@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جيوماب - خدمات خرائط وجغرافيا متكاملة | GeoMap - Integrated Mapping Services</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========== Design Variables ========== */
+        :root {
+            --primary-color: #246c99;
+            --secondary-color: #0d3854;
+            --accent-color: #f39c12;
+            --dark-color: #154360;
+            --light-color: #f8f9fa;
+            --text-color: #333;
+            --shadow: 0 0.2rem 0.5rem rgba(91, 27, 27, 0.1);
+            --transition: all 0.3s ease-in-out;
+        }
+
+        .dark-mode {
+            --primary-color: #1a4a66;
+            --secondary-color: #1c5c84;
+            --text-color: #f8f9fa;
+            --light-color: #222936;
+            --dark-color: #f8f9fa;
+            --accent-color: #e67e22;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== Basic Design ========== */
+        body {
+            font-family: 'Tajawal', 'Arial', sans-serif;
+            background-color: var(--light-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ========== Page Header ========== */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header .logo i {
+            color: var(--accent-color);
+        }
+
+        .header .logo:hover {
+            color: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        .header .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            width: 40%;
+            max-width: 25rem;
+            transition: var(--transition);
+        }
+
+        .header .search-bar:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .header .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--light-color);
+            font-size: 1.1rem;
+            width: 100%;
+            outline: none;
+            padding: 0.5rem;
+        }
+
+        .header .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .header .search-bar button {
+            background: none;
+            border: none;
+            color: var(--light-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 0.5rem;
+        }
+
+        .header .search-bar button:hover {
+            transform: scale(1.1);
+            color: var(--accent-color);
+        }
+
+        .header .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header .auth-buttons .btn {
+            padding: 0.7rem 1.4rem;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header .auth-buttons .btn-login {
+            background: transparent;
+            color: var(--light-color);
+            border: 1px solid var(--light-color);
+        }
+
+        .header .auth-buttons .btn-register {
+            background: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .header .auth-buttons .btn:hover {
+            transform: translateY(-0.2rem);
+            box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.15);
+        }
+
+        .header .auth-buttons .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header .auth-buttons .btn-register:hover {
+            background: #e67e22;
+        }
+
+        .header .actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header .actions .icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .header .actions .icon:hover {
+            transform: scale(1.1);
+            color: var(--accent-color);
+        }
+
+        .header .actions .icon .badge {
+            position: absolute;
+            top: -0.3rem;
+            left: -0.3rem;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            width: 1.2rem;
+            height: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Language switcher button */
+        .language-switcher {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.3rem;
+            transition: var(--transition);
+        }
+
+        .language-switcher:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .language-switcher img {
+            width: 20px;
+            height: 15px;
+            border-radius: 0.2rem;
+        }
+
+        /* ========== Sidebar ========== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -22rem;
+            width: 22rem;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--light-color);
+            transition: var(--transition);
+            z-index: 1001;
+            box-shadow: -0.2rem 0 0.5rem rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            right: 0;
+        }
+
+        .sidebar .close-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 0.5rem;
+        }
+
+        .sidebar .close-btn:hover {
+            transform: rotate(90deg);
+            color: var(--accent-color);
+        }
+
+        .sidebar .profile {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-bottom: 0.1rem solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar .profile img {
+            width: 9rem;
+            height: 9rem;
+            border-radius: 50%;
+            margin-bottom: 0.8rem;
+            border: 0.2rem solid var(--accent-color);
+            transition: var(--transition);
+            object-fit: cover;
+        }
+
+        .sidebar .profile img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 1rem rgba(243, 156, 18, 0.5);
+        }
+
+        .sidebar .profile h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar .profile p {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .sidebar .menu {
+            padding: 1rem;
+        }
+
+        .sidebar .menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            font-size: 1.2rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .sidebar .menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            padding-right: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .sidebar .menu a i {
+            margin-left: 0.8rem;
+            font-size: 1.3rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .sidebar .menu .active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* ========== Main Content ========== */
+        .main-content {
+            padding: 2rem;
+            transition: var(--transition);
+            flex: 1;
+        }
+
+        .main-content.active {
+            margin-right: 22rem;
+        }
+
+        .services {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-heading h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: inline-block;
+            position: relative;
+        }
+
+        .section-heading h2::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            right: 50%;
+            transform: translateX(50%);
+            width: 5rem;
+            height: 0.3rem;
+            background: var(--accent-color);
+            border-radius: 0.3rem;
+        }
+
+        .section-heading p {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .box-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Service card designs */
+        .box {
+            background-color: var(--light-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box:hover {
+            transform: translateY(-0.5rem);
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+        }
+
+        /* Service cover effect */
+        .box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0.5rem;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                var(--primary-color), 
+                var(--secondary-color));
+            z-index: 1;
+        }
+
+        .box .thumb {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+        }
+
+        .box .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .box:hover .thumb img {
+            transform: scale(1.05);
+        }
+
+        .box .thumb .category {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.3rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .box .content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box .title {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary-color);
+            line-height: 1.3;
+        }
+
+        .box .description {
+            font-size: 1rem;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .box .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .box .meta .rating {
+            color: var(--accent-color);
+        }
+
+        .box .meta .clients i {
+            margin-left: 0.3rem;
+        }
+
+        .box .price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .box .price .old-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--primary-color);
+            color: var(--light-color);
+            border-radius: 0.3rem;
+            font-weight: 600;
+            transition: var(--transition);
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-0.2rem);
+            box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-accent {
+            background: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .btn-accent:hover {
+            background: #e67e22;
+        }
+
+        /* ========== Interactive Maps Section ========== */
+        .map-container {
+            margin: 3rem 0;
+            width: 1200px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            height: 500px;
+            background: #eaf2f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .map-container .map-placeholder {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .map-container .map-placeholder i {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .map-container .map-placeholder h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .map-container .map-placeholder p {
+            font-size: 1.1rem;
+            color: black;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ========== Footer ========== */
+        .footer {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: right;
+        }
+
+        .footer .col h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer .col h3::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            right: 0;
+            width: 3rem;
+            height: 0.2rem;
+            background: var(--accent-color);
+        }
+
+        .footer .col p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .footer .col .links a {
+            display: block;
+            margin-bottom: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .footer .col .links a:hover {
+            color: var(--accent-color);
+            transform: translateX(-0.5rem);
+        }
+
+        .footer .col .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer .col .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .footer .col .social-links a:hover {
+            background: var(--accent-color);
+            color: var(--primary-color);
+            transform: translateY(-0.3rem);
+        }
+
+        .copyright {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+
+        /* Additional styles to make service cards equal and consistent */
+        .box {
+            height: 100%; /* Ensure the card stretches to maximum height */
+            min-height: 500px; /* Set a uniform minimum height */
+        }
+
+        .box .content {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Distribute space between elements */
+            height: 100%; /* Ensure content fills the card */
+        }
+
+        .box .description {
+            flex-grow: 1; /* Allow description to expand to fill available space */
+            min-height: 100px; /* Set a minimum height for description */
+        }
+
+        .box .meta {
+            margin-bottom: 1rem; /* Reduce margin for consistency */
+        }
+
+        .box .btn {
+            margin-top: auto; /* Push the button to the bottom */
+        }
+
+        /* ========== Responsive Design ========== */
+        @media (max-width: 992px) {
+            .header .search-bar {
+                width: 30%;
+            }
+          
+        }
+
+          @media (max-width: 992px) {
+            .map-container{
+                width: 100%;
+            }
+            .footer .container{
+                width: 40%;
+                height:100%;
+
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .header .logo {
+                order: 1;
+                font-size: 1.8rem;
+            }
+
+            .header .search-bar {
+                order: 3;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .header .auth-buttons {
+                order: 2;
+                margin-left: auto;
+            }
+
+            .header .actions {
+                order: 4;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .box-container {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+
+            .map-container {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .section-heading h2 {
+                font-size: 2rem;
+            }
+
+            .sidebar {
+                width: 80%;
+                right: -80%;
+            }
+
+            .main-content.active {
+                margin-right: 80%;
+            }
+
+            .box-container {
+                grid-template-columns: 1fr;
+            }
+
+            .map-container {
+                height: 300px;
+            }
+        }
+
+        /* ========== English Language Styles ========== */
+        body[dir="ltr"] {
+            font-family: 'Arial', sans-serif;
+            direction: ltr;
+        }
+
+        body[dir="ltr"] .header .logo {
+            font-family: 'Arial', sans-serif;
+        }
+
+        body[dir="ltr"] .sidebar {
+            right: auto;
+            left: -22rem;
+        }
+
+        body[dir="ltr"] .sidebar.active {
+            left: 0;
+        }
+
+        body[dir="ltr"] .sidebar .close-btn {
+            left: auto;
+            right: 1rem;
+        }
+
+        body[dir="ltr"] .sidebar .menu a i {
+            margin-left: 0;
+            margin-right: 0.8rem;
+        }
+
+        body[dir="ltr"] .sidebar .menu a:hover {
+            padding-right: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        body[dir="ltr"] .main-content.active {
+            margin-right: 0;
+            margin-left: 22rem;
+        }
+
+        body[dir="ltr"] .box::before {
+            right: auto;
+            left: 0;
+        }
+
+        body[dir="ltr"] .box .thumb .category {
+            left: auto;
+            right: 1rem;
+        }
+
+        body[dir="ltr"] .box .price {
+            text-align: right;
+        }
+
+        body[dir="ltr"] .box .price .old-price {
+            margin-right: 0;
+            margin-left: 0.5rem;
+        }
+
+        body[dir="ltr"] .footer .container {
+            text-align: left;
+        }
+
+        body[dir="ltr"] .footer .col h3::after {
+            right: auto;
+            left: 0;
+        }
+
+        body[dir="ltr"] .footer .col .links a:hover {
+            transform: translateX(0.5rem);
+        }
+
+        body[dir="ltr"] .section-heading h2::after {
+            right: auto;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Header -->
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-map-marked-alt"></i>
+            <span class="ar-text">جيوماب</span>
+            <span class="en-text" style="display: none;">GeoMap</span>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" class="ar-text" placeholder="ابحث عن خدمات خرائط...">
+            <input type="text" class="en-text" placeholder="Search for mapping services..." style="display: none;">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </div>
+        
+        <div class="auth-buttons">
+            <a href="loginn.html" class="btn btn-login">
+                <i class="fas fa-sign-in-alt"></i>
+                <span class="ar-text">تسجيل الدخول</span>
+                <span class="en-text" style="display: none;">Login</span>
+            </a>
+            <a href="register2.html" class="btn btn-register">
+                <i class="fas fa-user-plus"></i>
+                <span class="ar-text">إنشاء حساب</span>
+                <span class="en-text" style="display: none;">Register</span>
+            </a>
+        </div>
+        
+        <div class="actions">
+            <div class="language-switcher" id="language-switcher">
+                <img src="https://flagcdn.com/w20/eg.png" alt="English" class="en-flag">
+                <span class="ar-text">English</span>
+                <span class="en-text" style="display: none;">العربية</span>
+            </div>
+            <div class="icon menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="icon">
+                <i class="fas fa-moon" id="theme-toggle"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="close-btn">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <div class="profile">
+            <img src="f:\preoject developer\projectall\projectteam\icon\البحيرات.jpg" alt="User Image">
+            <h3 class="ar-text">التغيرات المورفولوجية</h3>
+            <h3 class="en-text" style="display: none;">Morphological Changes</h3>
+            <p class="ar-text">للبحيرات الشمالية للدلتا</p>
+            <p class="en-text" style="display: none;">For Northern Delta Lakes</p>
+        </div>
+        
+        <div class="menu">
+            <a href="#" class="active">
+                <i class="fas fa-home"></i>
+                <span class="ar-text">الرئيسية</span>
+                <span class="en-text" style="display: none;">Home</span>
+            </a>
+            <a href="index4.html">
+                <i class="fas fa-map"></i>
+                <span class="ar-text">الخرائط</span>
+                <span class="en-text" style="display: none;">Maps</span>
+            </a>
+            <a href="#">
+                <i class="fas fa-layer-group"></i>
+                <span class="ar-text">نظم المعلومات الجغرافية</span>
+                <span class="en-text" style="display: none;">GIS</span>
+            </a>
+            <a href="moropholgy.html">
+                <i class="fas fa-chart-bar"></i>
+                <span class="ar-text">تحليل التغيرات المورفولوجية</span>
+                <span class="en-text" style="display: none;">Morphological Changes Analysis</span>
+            </a>
+            <a href="promblems.html">
+                <i class="fas fa-cog"></i>
+                <span class="ar-text">التحدث معنا</span>
+                <span class="en-text" style="display: none;">Contact Us</span>
+            </a>
+            <a href="#">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="ar-text">تسجيل الخروج</span>
+                <span class="en-text" style="display: none;">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="services">
+            <div class="section-heading">
+                <h2 class="ar-text">خدماتنا الجغرافية المتكاملة</h2>
+                <h2 class="en-text" style="display: none;">Our Integrated Geographic Services</h2>
+                <p class="ar-text">نقدم حلولاً جغرافية متقدمة لجميع احتياجاتك من رسم الظاهرات إلى التحليل المتقدم</p>
+                <p class="en-text" style="display: none;">We provide advanced geographic solutions for all your needs from mapping to advanced spatial analysis</p>
+            </div>
+            
+            <div class="box-container">
+                <!-- Service 1 -->
+                <div class="box">
+                    <div class="thumb">
+                        <img src="icon\change.jpeg" alt="Interactive Maps">
+                        <span class="category ar-text">التغيرات المورفولوجية</span>
+                        <span class="category en-text" style="display: none;">Morphological Changes</span>
+                    </div>
+                    <div class="content">
+                        <h3 class="title ar-text">تحليل التغيرات المورفولوجية</h3>
+                        <h3 class="title en-text" style="display: none;">Morphological Changes Analysis</h3>
+                        <p class="description ar-text">يقدم التطبيق نظامًا تفاعليًا لتحليل التغيرات المورفولوجية للبحيرات الشمالية في دلتا مصر (البرلس، المنزلة، إدكو، مريوط) بدقة ومرونة. يتضمن الوظائف التالية:
+
+خريطة تفاعلية
+عرض دقيق لمواقع البحيرات باستخدام إحداثيات جغرافية.
+دعم طبقات خرائط متعددة (OSM، Esri، Google Satellite) لعرض مرن.
+تحليل شبكات الطرق
+إمكانية رسم شبكات طرق مخصصة.
+إحصائيات عامة تتضمن إجمالي المساحة وأكبر وأصغر بحيرة سنويًا.
+رسوم بيانية متنوعة (خطية، دائرية، أعمدة) توضح تغيرات المساحات لكل بحيرة وللمجموعة من 2013 إلى 2025.</p>
+                        <p class="description en-text" style="display: none;">The application provides an interactive system for accurately and flexibly analyzing morphological changes in the northern lakes of Egypt's Delta (Burullus, Manzala, Edku, Mariout). It includes:
+
+Interactive Map: Precise display of lake locations using geographical coordinates with multiple map layers (OSM, Esri, Google Satellite).
+Road Network Analysis: Custom road network drawing capability.
+General Statistics: Total area and annual largest/smallest lake statistics.
+Various Charts: Line, pie, and bar charts showing area changes for each lake and the group from 2013 to 2025.</p>
+                        <div class="meta">
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span class="ar-text">4.9 (127 تقييم)</span>
+                                <span class="en-text" style="display: none;">4.9 (127 ratings)</span>
+                            </span>
+                            <span class="clients">
+                                <i class="fas fa-users"></i>
+                            </span>
+                        </div>
+                        <a href="moropholgy.html" class="btn btn-accent ar-text">اطلب الخدمة</a>
+                        <a href="moropholgy.html" class="btn btn-accent en-text" style="display: none;">Order Service</a>
+                    </div>
+                </div>
+                
+                <!-- Service 2 -->
+                <div class="box">
+                    <div class="thumb">
+                        <img src="icon\lclu1.jpg" alt="GIS Systems">
+                        <span class="category ar-text">الغطاءات الأرضية</span>
+                        <span class="category en-text" style="display: none;">Land Cover</span>
+                    </div>
+                    <div class="content">
+                        <h3 class="title ar-text">الغطاءات الأرضية لسطح الأرض</h3>
+                        <h3 class="title en-text" style="display: none;">Land Cover Classification</h3> 
+                        <p class="description ar-text">يقدم التطبيق نظامًا تفاعليًا متطورًا لتحليل تغيرات الغطاء الأرضي باستخدام بيانات Sentinel-2 بدقة عالية ومرونة فائقة.
+
+الوظائف الرئيسية:
+خريطة تفاعلية:
+عرض دقيق للغطاء الأرضي باستخدام إحداثيات جغرافية واضحة.
+تحليل زمني ديناميكي:
+متابعة التغيرات السنوية في الغطاء الأرضي من 2017 إلى 2025.
+أداة ValuePicker التفاعلية لتحديد السنة وعرض التغيرات تلقائيًا.
+تصدير الخرائط:
+تحميل الخريطة كصورة بصيغة PNG بنقرة واحدة عبر زر مخصص.</p>
+                        <p class="description en-text" style="display: none;">The application provides an advanced interactive system for analyzing land cover changes using Sentinel-2 data with high precision and flexibility.
+
+Key Features:
+Interactive Map: Precise land cover display with clear geographic coordinates.
+Dynamic Temporal Analysis: Tracking annual land cover changes from 2017 to 2025.
+ValuePicker tool for automatic year selection and change display.
+Map Export: One-click PNG image download via dedicated button.</p>
+                        <div class="meta">
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span class="ar-text">4.8 (98 تقييم)</span>
+                                <span class="en-text" style="display: none;">4.8 (98 ratings)</span>
+                            </span>
+                            <span class="clients">
+                                <i class="fas fa-users"></i> 
+                            </span>
+                        </div>
+                        <div class="price"></div>
+                        <a href="landcover.html" class="btn btn-accent ar-text">اطلب الخدمة</a>
+                        <a href="landcover.html" class="btn btn-accent en-text" style="display: none;">Order Service</a>
+                    </div>
+                </div>
+                
+                <!-- Service 3 -->
+                <div class="box">
+                    <div class="thumb">
+                        <img src="icon\landsat.jpg" alt="Remote Sensing">
+                        <span class="category ar-text">استشعار</span>
+                        <span class="category en-text" style="display: none;">Remote Sensing</span>
+                    </div>
+                    <div class="content">
+                        <h3 class="title ar-text">تحليل صور الأقمار الصناعية</h3>
+                        <h3 class="title en-text" style="display: none;">Satellite Image Analysis</h3>
+                        <p class="description ar-text">يقدم التطبيق نظامًا تفاعليًا متقدمًا لتحليل بيانات صور Landsat الشهرية بدقة عالية ومرونة فائقة.
+
+الوظائف الرئيسية:
+خريطة تفاعلية:
+عرض دقيق لبيانات Landsat باستخدام إحداثيات جغرافية واضحة.
+تحليل زمني شهري:
+متابعة التغيرات في الغطاء الأرضي شهريًا من عام 2000 إلى 2025.
+اختيار النطاقات الطيفية:
+دعم تحليل النطاقات الطيفية المتنوعة (مثل الألوان الطبيعية، الأشعة تحت الحمراء، والنطاقات الفردية من 1 إلى 11).
+أدوات الرسم والقياس:
+رسم النقاط، الخطوط، والمضلعات على الخريطة.
+حساب المساحات (بالهكتار) والأطوال (بالمتر) تلقائيًا وعرضها في واجهة المستخدم.</p>
+                        <p class="description en-text" style="display: none;">The application provides an advanced interactive system for analyzing monthly Landsat imagery with high precision and flexibility.
+
+Key Features:
+Interactive Map: Precise Landsat data display with clear geographic coordinates.
+Monthly Analysis: Tracking monthly land cover changes from 2000 to 2025.
+Spectral Bands: Support for various spectral bands (natural color, infrared, individual bands 1-11).
+Drawing Tools: Points, lines, and polygons drawing with automatic area (hectares) and length (meters) calculations.</p>
+                        <div class="meta">
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span class="ar-text">4.7 (76 تقييم)</span>
+                                <span class="en-text" style="display: none;">4.7 (76 ratings)</span>
+                            </span>
+                            <span class="clients">
+                                <i class="fas fa-users"></i> 
+                            </span>
+                        </div>
+                        <a href="trylandsat.html" class="btn btn-accent ar-text">اطلب الخدمة</a>
+                        <a href="trylandsat.html" class="btn btn-accent en-text" style="display: none;">Order Service</a>
+                    </div>
+                </div>
+                
+                <!-- Service 4 -->
+                <div class="box">
+                    <div class="thumb">
+                        <img src="icon\بحيرات 2.jpg" alt="Spatial Analysis">
+                        <span class="category ar-text">نظام الرصد</span>
+                        <span class="category en-text" style="display: none;">Monitoring System</span>
+                    </div>
+                    <div class="content">
+                        <h3 class="title ar-text">نظام الرصد المتكامل للبحيرات الشمالية (2013-2035)</h3>
+                        <h3 class="title en-text" style="display: none;">Integrated Monitoring System for Northern Lakes (2013-2035)</h3>
+                        <p class="description ar-text">يقدم التطبيق نظامًا تفاعليًا متطورًا لتحليل التغيرات المورفولوجية والزراعية للبحيرات الشمالية في دلتا مصر (المنزلة، البرلس، مريوط، إدكو) بدقة عالية ومرونة فائقة من 2013 إلى 2035.
+
+الوظائف الرئيسية:
+متابعة التغيرات السنوية في مساحة البحيرات، من 2013 إلى 2035.
+تحليل الإنتاج الزراعي والسمكي:
+عرض بيانات تفصيلية لإنتاج الأسماك، المزارع، والمحاصيل (القمح، الأرز، القطن، قصب السكر).
+رسوم بيانية (خطية) لتتبع التغيرات عبر السنوات.
+بيانات تفصيلية:
+جدول بيانات ديناميكي يعرض معلومات البحيرات بناءً على اختيار البحيرة.</p>
+                        <p class="description en-text" style="display: none;">The application provides an advanced interactive system for analyzing morphological and agricultural changes in Egypt's northern Delta lakes (Manzala, Burullus, Mariout, Edku) with high precision from 2013 to 2035.
+
+Key Features:
+Annual tracking of lake area changes (2013-2035).
+Agricultural and fish production analysis:
+Detailed data on fish production, farms, and crops (wheat, rice, cotton, sugarcane).
+Line charts for tracking changes over years.
+Detailed data:
+Dynamic data table displaying lake information based on selection.</p>
+                        <div class="meta">
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span class="ar-text">4.9 (112 تقييم)</span>
+                                <span class="en-text" style="display: none;">4.9 (112 ratings)</span>
+                            </span>
+                            <span class="clients">
+                                <i class="fas fa-users"></i> 
+                            </span>
+                        </div>
+                        <a href="sysysysysy.html" class="btn btn-accent ar-text">اطلب الخدمة</a>
+                        <a href="sysysysysy.html" class="btn btn-accent en-text" style="display: none;">Order Service</a>
+                    </div>
+                </div>
+                
+                <!-- Service 5 -->
+                <div class="box">
+                    <div class="thumb">
+                        <img src="icon\slope.jpg" alt="Databases">
+                        <span class="category ar-text">عرض ثلاثي الأبعاد</span>
+                        <span class="category en-text" style="display: none;">3D Visualization</span>
+                    </div>
+                    <div class="content">
+                        <h3 class="title ar-text">عرض ثلاثي الأبعاد للتضاريس الأرضية</h3>
+                        <h3 class="title en-text" style="display: none;">3D Terrain Visualization</h3>
+                        <p class="description ar-text">يقدم التطبيق نظامًا تفاعليًا متقدمًا لتحليل بيانات التضاريس ثلاثية الأبعاد باستخدام طبقة ImageryTileLayer بدقة عالية ومرونة فائقة.
+
+الوظائف الرئيسية:
+خريطة ثلاثية الأبعاد تفاعلية:
+عرض دقيق للتضاريس باستخدام إحداثيات جغرافية وطبقة أساسية (gray-vector) مع إمكانية التبديل إلى طبقة ساتلية.
+دعم تأثيرات الظل (Shaded Relief) مع خيارات تقليدية ومتعددة الاتجاهات.
+تخصيص تأثيرات العرض:
+ضبط زاوية الشمس (Altitude) واتجاهها (Azimuth) لتعديل تأثيرات الإضاءة والظل.
+تعديل عامل التضخيم (Z-Factor) لتكبير التضاريس وتحسين التصور البصري.</p>
+                        <p class="description en-text" style="display: none;">The application provides an advanced interactive system for analyzing 3D terrain data using ImageryTileLayer with high precision and flexibility.
+
+Key Features:
+Interactive 3D Map:
+Accurate terrain display with geographic coordinates and base layer (gray-vector) with satellite layer option.
+Shaded Relief effects with traditional and multi-directional options.
+Display Customization:
+Sun angle (Altitude) and direction (Azimuth) adjustment for lighting effects.
+Z-Factor modification for terrain exaggeration and enhanced visualization.</p>
+                        <div class="meta">
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span class="ar-text">4.6 (64 تقييم)</span>
+                                <span class="en-text" style="display: none;">4.6 (64 ratings)</span>
+                            </span>
+                            <span class="clients">
+                                <i class="fas fa-users"></i> 
+                            </span>
+                        </div>
+                        <a href="imagerytile layer .html" class="btn btn-accent ar-text">اطلب الخدمة</a>
+                        <a href="imagerytile layer .html" class="btn btn-accent en-text" style="display: none;">Order Service</a>
+                    </div>
+                </div>
+                
+                <!-- Service 6 -->
+                <div class="box">
+                    <div class="thumb">
+                        <img src="icon\slpoe.jpg" alt="Topographic Maps">
+                        <span class="category ar-text">طبوغرافيا</span>
+                        <span class="category en-text" style="display: none;">Topography</span>
+                    </div>
+                    <div class="content">
+                        <h3 class="title ar-text">رسم خرائط طبوغرافية دقيقة</h3>
+                        <h3 class="title en-text" style="display: none;">Precise Topographic Mapping</h3>
+                        <p class="description ar-text">التطبيق عبارة عن نظام تفاعلي لتحليل التنقيب ثلاثي الأبعاد حيث توصلت شمال الدلتا باستخدام ArcGIS Maps SDK for JavaScript 4.32 ومكونات الكالسيت . فإنها تهدف إلى دراسة المورفولوجية بطريقة سهلة وسهلة.
+
+الوظيفة الرئيسية :
+خريطة ثلاثية الأبعاد تفاعلية :
+الفنانة المعروفة باستخدام ImageryTileLayer بدقة عالية.
+يدعم التبديل بين العودة (Gray-vector) وطبقة ساتلية (هجينة).
+وأشار إلى إحداثيات الدلتا ([31.0, 31.0]) لتكبير 8.
+تحليل التضاريس :
+الارتفاعات (Elevation) : تصور الارتفاعات مقابل متفاوت الفروق في العمق.
+الانحدارات (المنحدر) : يحسب الانحدار (0-30°) ويعرضها لونها (أخضر للمنخفض، أحمر للعالي).</p>
+                        <p class="description en-text" style="display: none;">
+                      Main Features:
+Interactive 3D Map:
+High-resolution imagery using ImageryTileLayer.
+Toggle between grayscale vector (Gray-vector) and satellite (Hybrid) layers.
+Pre-set Delta coordinates view at [31.0, 31.0] zoom level 8.
+Terrain Analysis:
+Elevation visualization with depth variations.
+Slope calculation (0-30°) with color gradient (green for low, red for high slopes).</p>
+                        <div class="meta">
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span class="ar-text">4.8 (89 تقييم)</span>
+                                <span class="en-text" style="display: none;">4.8 (89 ratings)</span>
+                            </span>
+                            <span class="clients">
+                                <i class="fas fa-users"></i> 
+                            </span>
+                        </div>
+                        <a href="slopeee.html" class="btn btn-accent ar-text">اطلب الخدمة</a>
+                        <a href="slopeee.html" class="btn btn-accent en-text" style="display: none;">Order Service</a>
+                    </div>
+                </div>
+
+            
+            <!-- Interactive Maps Section -->
+            <div class="map-container">
+                <div class="map-placeholder">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h3 class="ar-text">منصة الخرائط</h3>
+                    <h3 class="en-text" style="display: none;">Interactive Mapping</h3>
+                    <p class="ar-text">استكشف خرائط بحيرات شمال الدلتا مع تحليل بيانات متقدم وصور بصرية مذهلة.</p>
+                    <p class="en-text" style="display: none;">Explore northern Delta lakes maps with advanced data analysis and stunning visual imagery.</p>
+                    <a href="index4.html" class="btn btn-accent" style="margin-top: 1.5rem;">
+                        <span class="ar-text">تجربة المنصة</span>
+                        <span class="en-text" style="display: none;">Try Platform</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="col">
+                <h3 class="ar-text">جيوماب</h3>
+                <h3 class="en-text" style="display: none;">GeoMap</h3>
+                <p class="ar-text">منصة للخدمات الجغرافية والخرائطية، نقدم حلولاً مبتكرة في نظم المعلومات الجغرافية والاستشعار عن بعد.</p>
+                <p class="en-text" style="display: none;">An integrated platform for geographic and mapping services, providing innovative GIS and remote sensing solutions.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.linkedin.com/in/ammar-mohamed-4aa576218/"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            
+            <div class="col">
+                <h3 class="ar-text">روابط سريعة</h3>
+                <h3 class="en-text" style="display: none;">Quick Links</h3>
+                <div class="links">
+                    <a href="index.html" class="ar-text">الرئيسية</a>
+                    <a href="index.html" class="en-text" style="display: none;">Home</a>
+                    <a href="#" class="ar-text">الخدمات</a>
+                    <a href="#" class="en-text" style="display: none;">Services</a>
+                    <a href="index4.html" class="ar-text">منتجاتنا</a>
+                    <a href="#" class="en-text" style="display: none;">Products</a>
+                    <a href="index4.html" class="ar-text">المشاريع</a>
+                    <a href="index4.html" class="en-text" style="display: none;">Projects</a>
+                </div>
+            </div>
+            
+            <div class="col">
+                <h3 class="ar-text">الخدمات</h3>
+                <h3 class="en-text" style="display: none;">Services</h3>
+                <div class="links">
+                    <a href="index4.html" class="ar-text">الخرائط</a>
+                    <a href="index4.html" class="en-text" style="display: none;">Maps</a>
+                    <a href="imagerytile layer .html" class="ar-text">نظم المعلومات الجغرافية</a>
+                    <a href="imagerytile layer .html" class="en-text" style="display: none;">GIS</a>
+                    <a href="trylandsat.html" class="ar-text">الاستشعار عن بعد</a>
+                    <a href="trylandsat.html" class="en-text" style="display: none;">Remote Sensing</a>
+                    <a href="moropholgy.html" class="ar-text">التحليل التغيرات</a>
+                    <a href="moropholgy.html" class="en-text" style="display: none;">Analysis</a>
+                </div>
+            </div>
+            
+            <div class="col">
+                <h3 class="ar-text">اتصل بنا</h3>
+                <h3 class="en-text" style="display: none;">Contact Us</h3>
+                <p><i class="fas fa-map-marker-alt" style="margin-left: 0.5rem;"></i> 
+                    <span class="ar-text">الدلتا، البحيرات الشمالية للدلتا</span>
+                    <span class="en-text" style="display: none;">Delta, Northern Delta Lakes</span>
+                </p>
+                <p><i class="fas fa-phone" style="margin-left: 0.5rem;"></i> +20 12 345 6789</p>
+                <p><i class="fas fa-envelope" style="margin-left: 0.5rem;"></i> info@geomap.com</p>
+                <a href="promblems.html" class="btn btn-accent" style="margin-top: 1rem; display: inline-block;">
+                    <span class="ar-text">طلب استشارة</span>
+                    <span class="en-text" style="display: none;">Request Consultation</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <span class="ar-text">© حقوق النشر @ ٢٠٢٥ بواسطة عمار محمد عبد الله | جميع الحقوق محفوظة!</span>
+            <span class="en-text" style="display: none;">© Copyright 2025 by Ammar Mohammed Abdullah | All rights reserved!</span>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle sidebar
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.querySelector('.main-content').classList.toggle('active');
+        });
+
+        document.querySelector('.sidebar .close-btn').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.remove('active');
+            document.querySelector('.main-content').classList.remove('active');
+        });
+
+        // Toggle dark/light mode
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const icon = this;
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            if (sidebar.classList.contains('active') && 
+                !sidebar.contains(event.target) && 
+                !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('active');
+                document.querySelector('.main-content').classList.remove('active');
+            }
+        });
+
+        // Switch between Arabic and English
+        document.getElementById('language-switcher').addEventListener('click', function() {
+            const isEnglish = document.body.getAttribute('dir') === 'ltr';
+            
+            if (isEnglish) {
+                // Switch to Arabic
+                document.body.setAttribute('dir', 'rtl');
+                document.body.setAttribute('lang', 'ar');
+                document.querySelector('html').setAttribute('dir', 'rtl');
+                document.querySelector('html').setAttribute('lang', 'ar');
+                
+                // Show Arabic text and hide English
+                document.querySelectorAll('.ar-text').forEach(el => el.style.display = '');
+                document.querySelectorAll('.en-text').forEach(el => el.style.display = 'none');
+                
+                // Update language switcher
+                this.querySelector('.ar-text').style.display = 'none';
+                this.querySelector('.en-text').style.display = '';
+                this.querySelector('.en-flag').src = 'https://flagcdn.com/w20/gb.png';
+            } else {
+                // Switch to English
+                document.body.setAttribute('dir', 'ltr');
+                document.body.setAttribute('lang', 'en');
+                document.querySelector('html').setAttribute('dir', 'ltr');
+                document.querySelector('html').setAttribute('lang', 'en');
+                
+                // Show English text and hide Arabic
+                document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.en-text').forEach(el => el.style.display = '');
+                
+                // Update language switcher
+                this.querySelector('.ar-text').style.display = '';
+                this.querySelector('.en-text').style.display = 'none';
+                this.querySelector('.en-flag').src = 'https://flagcdn.com/w20/eg.png';
+            }
+        });
+    </script>
+</body>
+</html>

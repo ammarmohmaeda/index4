@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Register - Wind Energy Portal</title>
+
+   <!-- font awesome cdn link -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+  <!-- ربط مكتبة Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+  <!-- ربط ملف CSS -->
+  <link rel="stylesheet" href="style2.css">
+  <link rel="stylesheet" href="contactus.css">
+
+
+   <style>
+      :root {
+         --primary: #0066cc;
+         --secondary: #00aaff;
+         --white: #ffffff;
+         --dark: #1a1a1a;
+         --gray: #f0f2f5;
+         --transition: all 0.3s ease;
+      }
+
+      * {
+         margin: 0;
+         padding: 0;
+         box-sizing: border-box;
+         font-family: 'Poppins', sans-serif;
+      }
+
+      body {
+         background: var(--gray);
+         color: var(--dark);
+         line-height: 1.6;
+         transition: var(--transition);
+      }
+
+      .form-container {
+         min-height: 100vh;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 2rem;
+         padding-top: 100px;
+      }
+
+      .form-container form {
+         background: var(--white);
+         padding: 2rem;
+         border-radius: 10px;
+         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+         width: 100%;
+         max-width: 450px;
+      }
+
+      .form-container h3 {
+         font-size: 2rem;
+         text-align: center;
+         margin-bottom: 2rem;
+         color: var(--primary);
+      }
+
+      .form-container p {
+         margin: 0.5rem 0;
+         font-weight: 500;
+      }
+
+      .form-container p span {
+         color: #ff3333;
+      }
+
+      .box {
+         width: 100%;
+         padding: 0.8rem;
+         margin: 0.5rem 0;
+         border: 2px solid var(--gray);
+         border-radius: 5px;
+         font-size: 1rem;
+         transition: var(--transition);
+      }
+
+      .box:focus {
+         border-color: var(--primary);
+         outline: none;
+         box-shadow: 0 0 5px rgba(0,102,204,0.3);
+      }
+
+      input[type="file"] {
+         padding: 0.5rem;
+      }
+
+      
+
+      @keyframes fadeIn {
+         from { opacity: 0; transform: translateY(-10px); }
+         to { opacity: 1; transform: translateY(0); }
+      }
+
+      @media (max-width: 768px) {
+         .header .flex {
+            flex-direction: column;
+            padding: 1rem;
+         }
+
+         .search-form {
+            margin: 1rem 0;
+            width: 100%;
+         }
+
+         .search-form input {
+            width: 100%;
+         }
+      }
+   </style>
+</head>
+<body>
+
+
+<!--  Header -->
+<header class="header">
+  <div class="logo">North Delta Lakes</div>
+  <div class="search-bar">
+     <input type="text" placeholder="Search services...">
+     <button><i class="fas fa-search"></i></button>
+  </div>
+  <div class="actions">
+     <a href="loginn.html" class="btn">Login</a>
+     <a href="register2.html" class="btn">Register</a>
+     <div class="icon" id="dark-mode-toggle">
+        <i class="fas fa-moon"></i>
+     </div>
+     <div class="icon" id="menu-btn">
+        <i class="fas fa-bars"></i>
+     </div>
+  </div>
+</header>
+
+
+
+
+
+<section class="form-container">
+   <form action="" method="post" enctype="multipart/form-data">
+      <h3>Register Now</h3>
+      <p>Your Name <span>*</span></p>
+      <input type="text" name="name" placeholder="Enter your name" required maxlength="50" class="box">
+      <p>Your Email <span>*</span></p>
+      <input type="email" name="email" placeholder="Enter your email" required maxlength="50" class="box">
+      <p>Your Password <span>*</span></p>
+      <input type="password" name="pass" placeholder="Enter your password" required maxlength="20" class="box">
+      <p>Confirm Password <span>*</span></p>
+      <input type="password" name="c_pass" placeholder="Confirm your password" required maxlength="20" class="box">
+      <p>Select Profile Picture <span>*</span></p>
+      <input type="file" accept="image/*" required class="box">
+      <input type="submit" value="Register Now" name="submit" class="btn">
+   </form>
+</section>
+
+<footer class="footer">
+   © copyright @ 2024 by <span>Ammar Mohamed Abdallah</span> | All rights reserved!
+</footer>
+<script src="contactus.js"></script>
+
+<script>
+   // Menu Toggle
+   const menuBtn = document.querySelector('#menu-btn');
+   const closeBtn = document.querySelector('#close-btn');
+   const sidebar = document.querySelector('.side-bar');
+
+   menuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+   });
+
+   closeBtn.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+   });
+
+   // Profile Toggle
+   const userBtn = document.querySelector('#user-btn');
+   const profile = document.querySelector('.profile');
+
+   userBtn.addEventListener('click', () => {
+      profile.classList.toggle('active');
+   });
+
+   // Search Form Toggle
+   const searchBtn = document.querySelector('#search-btn');
+   const searchForm = document.querySelector('.search-form');
+
+   searchBtn.addEventListener('click', () => {
+      searchForm.classList.toggle('active');
+   });
+
+   // Theme Toggle
+   const toggleBtn = document.querySelector('#toggle-btn');
+   let isDark = false;
+
+   toggleBtn.addEventListener('click', () => {
+      if (!isDark) {
+         document.body.style.background = '#1a1a1a';
+         document.body.style.color = '#ffffff';
+         toggleBtn.classList.remove('fa-sun');
+         toggleBtn.classList.add('fa-moon');
+         isDark = true;
+      } else {
+         document.body.style.background = '#f0f2f5';
+         document.body.style.color = '#1a1a1a';
+         toggleBtn.classList.remove('fa-moon');
+         toggleBtn.classList.add('fa-sun');
+         isDark = false;
+      }
+   });
+
+   // Form Validation
+   const form = document.querySelector('.form-container form');
+   form.addEventListener('submit', (e) => {
+      const name = form.querySelector('input[name="name"]').value;
+      const email = form.querySelector('input[name="email"]').value;
+      const password = form.querySelector('input[name="pass"]').value;
+      const confirmPass = form.querySelector('input[name="c_pass"]').value;
+      const file = form.querySelector('input[type="file"]').value;
+
+      if (name.length < 3) {
+         e.preventDefault();
+         alert('Name must be at least 3 characters long');
+         return;
+      }
+
+      if (!email.includes('@') || !email.includes('.')) {
+         e.preventDefault();
+         alert('Please enter a valid email address');
+         return;
+      }
+
+      if (password.length < 6) {
+         e.preventDefault();
+         alert('Password must be at least 6 characters long');
+         return;
+      }
+
+      if (password !== confirmPass) {
+         e.preventDefault();
+         alert('Passwords do not match');
+         return;
+      }
+
+      if (!file) {
+         e.preventDefault();
+         alert('Please select a profile picture');
+         return;
+      }
+   });
+
+   // Close profile when clicking outside
+   document.addEventListener('click', (e) => {
+      if (!profile.contains(e.target) && !userBtn.contains(e.target)) {
+         profile.classList.remove('active');
+      }
+   });
+
+   // File input preview (optional feature)
+   const fileInput = document.querySelector('input[type="file"]');
+   fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+         const reader = new FileReader();
+         reader.onload = (e) => {
+            console.log('Image selected:', e.target.result);
+            // You could add a preview image here if desired
+         };
+         reader.readAsDataURL(file);
+      }
+   });
+</script>
+<script src="script2.js"></script>
+<script src="index.js"></script>
+
+
+</body>
+</html>

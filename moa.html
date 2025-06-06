@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Landsat Imagery Viewer</title>
+
+   <!-- Font Awesome -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+
+   <!-- ArcGIS API for JavaScript -->
+   <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+   <script src="https://js.arcgis.com/4.30/"></script>
+
+   <!-- Calcite Components -->
+   <script type="module" src="https://js.arcgis.com/calcite-components/2.11.1/calcite.esm.js"></script>
+   <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.11.1/calcite.css" />
+
+   <style>
+      html, body, #viewDiv {
+         padding: 0;
+         margin: 0;
+         height: 100%;
+         width: 100%;
+      }
+
+      .panel-content {
+         padding: 12px;
+         display: flex;
+         flex-direction: column;
+         gap: 12px;
+         background: white;
+         border-radius: 8px;
+         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .footer {
+         text-align: center;
+         padding: 10px;
+         background-color: #f1f1f1;
+         position: fixed;
+         bottom: 0;
+         width: 100%;
+      }
+
+      .warning-message {
+         color: red;
+         font-weight: bold;
+         text-align: center;
+         margin-top: 10px;
+      }
+
+      .download-button {
+         background-color: #4CAF50;
+         color: white;
+         padding: 10px;
+         border: none;
+         cursor: pointer;
+         text-align: center;
+         border-radius: 5px;
+      }
+
+      .download-button:hover {
+         background-color: #45a049;
+      }
+
+      .dropdown {
+         padding: 8px;
+         border-radius: 5px;
+         border: 1px solid #ccc;
+      }
+
+      .slider {
+         width: 100%;
+      }
+   </style>
+</head>
+<body>
+
+<header class="header">
+   <section class="flex">
+      <a href="index.html" class="logo">Back to home</a>
+      <form action="search.html" method="post" class="search-form">
+      
+      </div>
+   </section>
+</header>
+
+<div id="viewDiv"></div>
+
+<calcite-panel id="pickerContainer" heading="Landsat Imagery (2017-2024)">
+   <div class="panel-content">
+      <div id="valuePickerTimeDiv"></div>
+      <select id="bandDropdown" class="dropdown">
+         <option value="Natural Color">Natural Color (Bands 4, 3, 2)</option>
+         <option value="Color Infrared">Color Infrared (Bands 5, 4, 3)</option>
+         <option value="Shortwave Infrared">Shortwave Infrared (Bands 6, 5, 4)</option>
+         <option value="NDVI">NDVI (Normalized Difference Vegetation Index)</option>
+         <option value="MNDWI">MNDWI (Modified Normalized Difference Water Index)</option>
+         <option value="NDBI">NDBI (Normalized Difference Built-up Index)</option>
+         <option value="SI">SI (Soil Index)</option>
+         <option value="LSWI">LSWI (Land Surface Water Index)</option>
+         <option value="Clay">Clay Content</option>
+      </select>
+      <label for="transparencySlider">Transparency:</label>
+      <input type="range" id="transparencySlider" class="slider" min="0" max="1" step="0.1" value="1">
+      <button id="downloadButton" class="download-button">Download Map as Image</button>
+      <div id="warningMessage" class="warning-message"></div>
+   </div>
+</calcite-panel>
+
+<footer class="footer">
+   &copy; Copyright @ 2024 by <span>Ammar Mohamed Abdallah</span> | All rights reserved!
+</footer>
+
+<script>
+   require([
+       "esri/Map",
+       "esri/views/MapView",
+       "esri/layers/ImageryLayer",
+       "esri/widgets/ValuePicker",
+       "esri/widgets/Legend",
+       "esri/widgets/Expand",
+       "esri/core/reactiveUtils"
+   ], (Map, MapView, ImageryLayer, ValuePicker, Legend, Expand, reactiveUtils) =>
+       (async () => {
+           // خدمة Landsat Imagery من ArcGIS Living Atlas
+           const layer = new ImageryLayer({
+               url: "https://landsat2.arcgis.com/arcgis/rest/services/Landsat/MS/ImageServer",
+               effect: "brightness(110%) drop-shadow(2px, 2px, 3px, #000)",
+               blendMode: "multiply"
+           });
+
+           const map = new Map({
+               basemap: "satellite",
+               layers: [layer]
+           });
+
+           const view = new MapView({
+               container: "viewDiv",
+               map,
+               zoom: 11,
+               center: [30.5, 27.8] // إحداثيات محافظة المنيا
+           });
+
+           await view.whenLayerView(layer);
+
+           // تعيين التواريخ من 2017 إلى 2024
+           const startDate = new Date(2017, 0, 1);
+           const endDate = new Date(2024, 0, 1);
+           let currentDate = startDate;
+
+           const labelComponentForDates = [];
+           while (currentDate <= endDate) {
+               labelComponentForDates.push({
+                   value: currentDate.getTime(),
+                   label: "Imagery in " + currentDate.getFullYear()
+               });
+               currentDate.setFullYear(currentDate.getFullYear() + 1);
+           }
+
+           // إنشاء أداة اختيار التواريخ
+           const valuePickerTime = new ValuePicker({
+               values: [labelComponentForDates[0].value],
+               component: {
+                   type: "label",
+                   items: labelComponentForDates
+               },
+               playRate: 1500,
+               loop: true,
+               container: "valuePickerTimeDiv"
+           });
+
+           // تحديث النطاق الزمني للخريطة
+           reactiveUtils.watch(
+               () => valuePickerTime.values,
+               (values) => {
+                   const startDate = new Date(values[0]);
+                   const endDate = startDate.setFullYear(startDate.getFullYear() + 1);
+                   view.timeExtent = {
+                       start: new Date(values[0]),
+                       end: new Date(endDate)
+                   };
+
+                   // التحقق من توفر البيانات لسنة معينة
+                   const selectedYear = startDate.getFullYear();
+                   if (selectedYear < 2017 || selectedYear > 2024) {
+                       document.getElementById("warningMessage").innerText = "⚠️ Data not available for year " + selectedYear;
+                   } else {
+                       document.getElementById("warningMessage").innerText = "";
+                   }
+               }
+           );
+
+           // إضافة زر تحميل الخريطة كصورة
+           document.getElementById("downloadButton").addEventListener("click", () => {
+               view.takeScreenshot().then((screenshot) => {
+                   const link = document.createElement("a");
+                   link.href = screenshot.dataUrl;
+                   link.download = `LandsatImagery_${new Date().toISOString()}.png`;
+                   link.click();
+               });
+           });
+
+           // إضافة قائمة منسدلة لاختيار النطاقات والمؤشرات
+           const bandDropdown = document.getElementById("bandDropdown");
+           bandDropdown.addEventListener("change", (event) => {
+               const selectedBand = event.target.value;
+               switch (selectedBand) {
+                   case "Natural Color":
+                       layer.rasterFunction = {
+                           functionName: "Natural Color with DRA",
+                           arguments: {
+                               BandIds: [4, 3, 2]
+                           }
+                       };
+                       break;
+                   case "Color Infrared":
+                       layer.rasterFunction = {
+                           functionName: "Color Infrared with DRA",
+                           arguments: {
+                               BandIds: [5, 4, 3]
+                           }
+                       };
+                       break;
+                   case "Shortwave Infrared":
+                       layer.rasterFunction = {
+                           functionName: "Shortwave Infrared with DRA",
+                           arguments: {
+                               BandIds: [6, 5, 4]
+                           }
+                       };
+                       break;
+                   case "NDVI":
+                       layer.rasterFunction = {
+                           functionName: "NDVI",
+                           arguments: {
+                               BandIds: [5, 4]
+                           }
+                       };
+                       break;
+                   case "MNDWI":
+                       layer.rasterFunction = {
+                           functionName: "MNDWI",
+                           arguments: {
+                               BandIds: [3, 6]
+                           }
+                       };
+                       break;
+                   case "NDBI":
+                       layer.rasterFunction = {
+                           functionName: "NDBI",
+                           arguments: {
+                               BandIds: [6, 5]
+                           }
+                       };
+                       break;
+                   case "SI":
+                       layer.rasterFunction = {
+                           functionName: "SI",
+                           arguments: {
+                               BandIds: [4, 3]
+                           }
+                       };
+                       break;
+                   case "LSWI":
+                       layer.rasterFunction = {
+                           functionName: "LSWI",
+                           arguments: {
+                               BandIds: [5, 6]
+                           }
+                       };
+                       break;
+                   case "Clay":
+                       layer.rasterFunction = {
+                           functionName: "Clay",
+                           arguments: {
+                               BandIds: [6, 7]
+                           }
+                       };
+                       break;
+                   default:
+                       layer.rasterFunction = null;
+               }
+           });
+
+           // التحكم في شفافية الطبقة
+           const transparencySlider = document.getElementById("transparencySlider");
+           transparencySlider.addEventListener("input", (event) => {
+               layer.opacity = parseFloat(event.target.value);
+           });
+
+           // إضافة الأدوات إلى الواجهة
+           const pickerContainer = document.getElementById("pickerContainer");
+           view.ui.add(pickerContainer, "top-right");
+
+           const legendExpand = new Expand({
+               expandTooltip: "Show Legend",
+               expanded: false,
+               view: view,
+               content: new Legend({ view })
+           });
+           view.ui.add(legendExpand, "top-left");
+       })());
+</script>
+
+</body>
+</html>

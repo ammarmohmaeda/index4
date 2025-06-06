@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طاقة الرياح في المنيا</title>
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <!-- Google Fonts: Cairo for Arabic -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2a9d8f; /* Soft green for eco-friendly theme */
+            --secondary-color: #264653; /* Deep blue for contrast */
+            --accent-color: #e9c46a; /* Warm yellow for highlights */
+            --background-color: #f4f4f9; /* Light neutral background */
+            --text-color: #264653; /* Dark blue text */
+            --success-color: #26a269; /* Green for success messages */
+            --error-color: #e63946; /* Red for error messages */
+            --white: #ffffff; /* Pure white for cards and headers */
+        }
+
+        * {
+            font-family: 'Cairo', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+            outline: none;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background-color), #e0f7fa); /* Gradient background */
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* الرأس */
+        .header {
+            background: var(--white);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            padding: 1.2rem 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+        }
+
+        .header .logo {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header .logo:hover {
+            color: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .header .actions .btn {
+            padding: 0.8rem 1.8rem;
+            font-size: 1.5rem;
+            border-radius: 25px;
+            background: var(--primary-color);
+            color: var(--white);
+            margin-left: 1rem;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .actions .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .header .actions .icon {
+            font-size: 2.2rem;
+            color: var(--text-color);
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+
+        .header .actions .icon:hover {
+            color: var(--accent-color);
+        }
+
+        /* الشريط الجانبي */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -25rem;
+            background: var(--white);
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+            width: 25rem;
+            height: 100vh;
+            padding: 2rem;
+            z-index: 1100;
+            transition: right 0.4s ease-in-out;
+        }
+
+        .sidebar.active {
+            right: 0;
+        }
+
+        .sidebar .close-btn {
+            font-size: 2.5rem;
+            color: var(--text-color);
+            cursor: pointer;
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+        }
+
+        .sidebar .close-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .sidebar .profile {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            color: var(--white);
+        }
+
+        .sidebar .profile img {
+            width: 8rem;
+            height: 8rem;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 3px solid var(--white);
+        }
+
+        .sidebar .profile h3 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .sidebar .profile p {
+            font-size: 1.4rem;
+            opacity: 0.9;
+        }
+
+        .sidebar .menu a {
+            display: flex;
+            align-items: center;
+            font-size: 1.6rem;
+            color: var(--text-color);
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            background: var(--background-color);
+        }
+
+        .sidebar .menu a:hover {
+            background: var(--primary-color);
+            color: var(--white);
+            transform: translateX(-5px);
+        }
+
+        .sidebar .menu a i {
+            margin-left: 1rem;
+            font-size: 1.8rem;
+        }
+
+        /* المحتوى الرئيسي */
+        .main-content {
+            margin-top: 7rem;
+            padding: 3rem 5%;
+            min-height: calc(100vh - 14rem);
+        }
+
+        .section {
+            background: var(--white);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section h1 {
+            font-size: 2.8rem;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+
+        .form-container input,
+        .form-container textarea {
+            padding: 1.3rem;
+            font-size: 1.5rem;
+            background: var(--background-color);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-container input:focus,
+        .form-container textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .form-container textarea {
+            resize: none;
+            height: 16rem;
+        }
+
+        .form-container button {
+            padding: 1.3rem;
+            font-size: 1.6rem;
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        /* تصميم قسم الاتصال */
+        .contact .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+        }
+
+        .contact .row .form-container,
+        .contact .row .info-container {
+            flex: 1 1 40rem;
+        }
+
+        .contact .row .form-container h3 {
+            font-size: 2.4rem;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .contact .row .info-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact .row .info-container .info-box {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--background-color);
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .contact .row .info-container .info-box:hover {
+            transform: scale(1.05);
+        }
+
+        .contact .row .info-container .info-box i {
+            font-size: 2.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .contact .row .info-container .info-box h3 {
+            font-size: 1.9rem;
+            color: var(--text-color);
+            margin-bottom: 0.8rem;
+        }
+
+        .contact .row .info-container .info-box a {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact .row .info-container .info-box a:hover {
+            color: var(--accent-color);
+            opacity: 1;
+        }
+
+        .contact .map-container {
+            margin-top: 2.5rem;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--primary-color);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .contact .map-container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .contact .map-container iframe {
+            width: 100%;
+            height: 45rem;
+            border: 0;
+        }
+
+        .contact .map-title {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--white);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 1rem 2rem;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px var(--primary-color);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color); }
+            100% { text-shadow: 0 0 20px var(--secondary-color), 0 0 30px var(--secondary-color); }
+        }
+
+        /* لوحة التحكم */
+        .dashboard table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            background: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .dashboard table th,
+        .dashboard table td {
+            border: 1px solid #e0e0e0;
+            padding: 1.2rem;
+            font-size: 1.5rem;
+            text-align: right;
+        }
+
+        .dashboard table th {
+            background: var(--primary-color);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .dashboard table td {
+            background: var(--background-color);
+        }
+
+        .message {
+            padding: 1.3rem;
+            font-size: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: none;
+            text-align: center;
+        }
+
+        .message.success {
+            background: var(--success-color);
+            color: var(--white);
+        }
+
+        .message.error {
+            background: var(--error-color);
+            color: var(--white);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* التذييل */
+        .footer {
+            background: var(--secondary-color);
+            color: var(--white);
+            text-align: center;
+            padding: 2.5rem;
+            font-size: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .footer span {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* الاستجابة */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1.2rem 3%;
+            }
+
+            .main-content {
+                padding: 2rem 3%;
+            }
+
+            .section {
+                padding: 2rem;
+            }
+
+            .contact .row {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 22rem;
+            }
+
+            .contact .map-container iframe {
+                height: 35rem;
+            }
+
+            .contact .map-title {
+                font-size: 2rem;
+                padding: 0.8rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 450px) {
+            html {
+                font-size: 55%;
+            }
+
+            .header .logo {
+                font-size: 2rem;
+            }
+
+            .sidebar {
+                width: 18rem;
+            }
+
+            .contact .map-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- الرأس -->
+    <header class="header">
+        <a href="#" class="logo">البحيرات الشماليه للدلتا</a>
+        <div class="actions">
+            <a href="#" class="btn" id="show-login">تسجيل الدخول</a>
+            <a href="#" class="btn" id="show-register">تسجيل</a>
+            <a href="#" class="btn hidden" id="logout">تسجيل الخروج</a>
+            <span class="icon" id="menu-btn"><i class="fas fa-bars"></i></span>
+        </div>
+    </header>
+
+    <!-- الشريط الجانبي -->
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" id="close-btn"><i class="fas fa-times"></i></span>
+        <div class="profile">
+            <img src="f:\preoject developer\projectall\projectteam\icon\البحيرات.jpg" alt="Minya Governorate Logo">
+            <h3>التغيرات الموروفولجيا</h3>
+            <p>للبحيرات الشماليه للدلتا</p>
+        </div>
+        <nav class="menu">
+            <a href="#" onclick="showSection(contactSection)"><i class="fas fa-headset"></i> اتصل بنا</a>
+            <a href="#" onclick="showSection(registerSection)"><i class="fas fa-user-plus"></i> تسجيل</a>
+            <a href="#" onclick="showSection(loginSection)"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</a>
+        </nav>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content" id="main-content">
+        <!-- نموذج التسجيل -->
+        <section class="section hidden" id="register-section">
+            <h1>إنشاء حساب جديد</h1>
+            <div class="form-container">
+                <form id="register-form">
+                    <div id="register-message" class="message"></div>
+                    <input type="text" name="username" placeholder="اسم المستخدم" required>
+                    <input type="text" name="fullname" placeholder="الاسم الكامل" required>
+                    <input type="email" name="email" placeholder="البريد الإلكتروني" required>
+                    <input type="tel" name="phone" placeholder="رقم الهاتف" required>
+                    <input type="password" name="password" placeholder="كلمة المرور" required minlength="6">
+                    <input type="password" name="confirm_password" placeholder="تأكيد كلمة المرور" required>
+                    <button type="submit">تسجيل الحساب</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- نموذج تسجيل الدخول -->
+        <section class="section hidden" id="login-section">
+            <h1>تسجيل الدخول</h1>
+            <div class="form-container">
+                <form id="login-form">
+                    <div id="login-message" class="message"></div>
+                    <input type="text" name="username" placeholder="اسم المستخدم" required>
+                    <input type="password" name="password" placeholder="كلمة المرور" required>
+                    <button type="submit">تسجيل الدخول</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- قسم الاتصال -->
+        <section class="section contact" id="contact-section">
+            <h1 class="heading">اتصل بنا</h1>
+            <div class="row">
+                <!-- نموذج الاتصال -->
+                <div class="form-container">
+                    <h3>تواصلوا معنا</h3>
+                    <form id="contact-form">
+                        <div id="contact-message" class="message"></div>
+                        <input type="text" name="name" placeholder="اسمك" required maxlength="50">
+                        <input type="email" name="email" placeholder="بريدك الإلكتروني" required maxlength="50">
+                        <input type="tel" name="phone" placeholder="رقم الهاتف" required maxlength="15">
+                        <textarea name="message" placeholder="رسالتك" required maxlength="1000"></textarea>
+                        <button type="submit" class="inline-btn">إرسال الرسالة</button>
+                    </form>
+                </div>
+
+                <!-- معلومات الاتصال -->
+                <div class="info-container">
+                    <div class="info-box">
+                        <i class="fas fa-phone"></i>
+                        <h3>الهاتف</h3>
+                        <a href="tel:1234567890">123-456-7890</a>
+                        <a href="tel:1112223333">111-222-3333</a>
+                    </div>
+                    <div class="info-box">
+                        <i class="fas fa-envelope"></i>
+                        <h3>البريد الإلكتروني</h3>
+                        <a href="mailto:shaikhanas@gmail.com">amamamama@gmail.com</a>
+                        <a href="mailto:anasbhai@gmail.com">amamamamamama.com</a>
+                    </div>
+                    <div class="info-box">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>العنوان</h3>
+                        <a href="#" id="map-toggle">البحيرات الشمالية للدلتا، مصر</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الخريطة التفاعلية -->
+            <div class="map-container" id="map-container">
+                <h3 class="map-title">البحيرات الشمالية للدلتا</h3>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d109250.75280675756!2d30.895554168055058!3d31.19813980849566!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f5c4a3a5c6d8e7%3A0x9e5b5b7b7b7b7b7b!2sNorthern%20Delta%20Lakes%2C%20Egypt!5e0!3m2!1sen!2seg!4v16987654321" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </section>
+
+        <!-- لوحة التحكم (للمسؤولين فقط) -->
+        <section class="section hidden" id="dashboard">
+            <h1>لوحة التحكم</h1>
+            <h2>الرسائل المستلمة</h2>
+            <table id="messages-table">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>رقم الهاتف</th>
+                        <th>الرسالة</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <h2>المستخدمون المسجلون</h2>
+            <table id="users-table">
+                <thead>
+                    <tr>
+                        <th>اسم المستخدم</th>
+                        <th>الاسم الكامل</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>رقم الهاتف</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <h2>سجل تسجيلات الدخول</h2>
+            <table id="login-logs-table">
+                <thead>
+                    <tr>
+                        <th>اسم المستخدم</th>
+                        <th>تاريخ الدخول</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- التذييل -->
+    <footer class="footer">
+        © حقوق النشر @ ٢٠٢٤ بواسطة <span>عمار محمد عبد الله</span> | جميع الحقوق محفوظة!
+    </footer>
+
+    <!-- جافا سكريبت -->
+    <script>
+        // التحكم في إظهار الأقسام
+        const registerSection = document.getElementById('register-section');
+        const loginSection = document.getElementById('login-section');
+        const contactSection = document.getElementById('contact-section');
+        const dashboard = document.getElementById('dashboard');
+        const showLogin = document.getElementById('show-login');
+        const showRegister = document.getElementById('show-register');
+        const logoutBtn = document.getElementById('logout');
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const closeBtn = document.getElementById('close-btn');
+
+        function showSection(section) {
+            registerSection.classList.add('hidden');
+            loginSection.classList.add('hidden');
+            contactSection.classList.add('hidden');
+            dashboard.classList.add('hidden');
+            section.classList.remove('hidden');
+            sidebar.classList.remove('active');
+        }
+
+        // التحكم في الشريط الجانبي
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+        });
+
+        // عرض الرسائل
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `message ${type}`;
+            element.style.display = 'block';
+            setTimeout(() => element.style.display = 'none', 5000);
+        }
+
+        // إنشاء حساب مسؤول افتراضي
+        function createDefaultAdmin() {
+            const defaultAdminUsername = 'admin';
+            if (!localStorage.getItem(`user_${defaultAdminUsername}`)) {
+                const defaultAdmin = {
+                    username: defaultAdminUsername,
+                    fullname: 'مسؤول النظام',
+                    email: 'admin@minyawind.com',
+                    phone: '01234567890',
+                    password: 'admin123',
+                    role: 'admin'
+                };
+                localStorage.setItem(`user_${defaultAdminUsername}`, JSON.stringify(defaultAdmin));
+            }
+        }
+
+        // استدعاء دالة إنشاء المسؤول
+        createDefaultAdmin();
+
+        // التحقق من حالة تسجيل الدخول
+        function checkAuth() {
+            const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            if (loggedInUser) {
+                const userData = JSON.parse(localStorage.getItem(`user_${loggedInUser.username}`));
+                showLogin.classList.add('hidden');
+                showRegister.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                if (userData.role === 'admin') {
+                    dashboard.classList.remove('hidden');
+                    loadDashboard();
+                } else {
+                    dashboard.classList.add('hidden');
+                    showSection(contactSection);
+                }
+            } else {
+                showLogin.classList.remove('hidden');
+                showRegister.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                dashboard.classList.add('hidden');
+                showSection(contactSection);
+            }
+        }
+
+        // تسجيل حساب جديد
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm_password');
+            const username = formData.get('username');
+
+            if (password !== confirmPassword) {
+                showMessage('register-message', 'كلمتا المرور غير متطابقتين', 'error');
+                return;
+            }
+
+            const userData = {
+                username: username,
+                fullname: formData.get('fullname'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                password: password,
+                role: 'user'
+            };
+
+            // التحقق من وجود اسم المستخدم
+            if (localStorage.getItem(`user_${username}`)) {
+                showMessage('register-message', 'اسم المستخدم مسجل مسبقًا', 'error');
+                return;
+            }
+
+            localStorage.setItem(`user_${username}`, JSON.stringify(userData));
+            showMessage('register-message', 'تم إنشاء الحساب بنجاح!', 'success');
+            e.target.reset();
+            setTimeout(() => showSection(loginSection), 2000);
+        });
+
+        // تسجيل الدخول
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const username = formData.get('username');
+            const password = formData.get('password');
+            const userData = JSON.parse(localStorage.getItem(`user_${username}`));
+
+            if (!userData || userData.password !== password) {
+                showMessage('login-message', 'اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+                return;
+            }
+
+            // حفظ حالة تسجيل الدخول
+            sessionStorage.setItem('loggedInUser', JSON.stringify({
+                username: userData.username,
+                fullname: userData.fullname
+            }));
+
+            // تسجيل وقت الدخول
+            let loginLogs = JSON.parse(localStorage.getItem('login_logs')) || [];
+            loginLogs.push({
+                username: userData.username,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('login_logs', JSON.stringify(loginLogs));
+
+            showMessage('login-message', 'تم تسجيل الدخول بنجاح!', 'success');
+            checkAuth();
+        });
+
+        // إرسال رسالة
+        document.getElementById('contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const messageData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                message: formData.get('message'),
+                timestamp: new Date().toISOString()
+            };
+
+            let messages = JSON.parse(localStorage.getItem('contact_messages')) || [];
+            messages.push(messageData);
+            localStorage.setItem('contact_messages', JSON.stringify(messages));
+
+            showMessage('contact-message', 'تم إرسال الرسالة بنجاح!', 'success');
+            e.target.reset();
+            if (sessionStorage.getItem('loggedInUser')) loadDashboard();
+        });
+
+        // تسجيل الخروج
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('loggedInUser');
+            checkAuth();
+        });
+
+        // تحميل بيانات لوحة التحكم
+        function loadDashboard() {
+            const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            const userData = JSON.parse(localStorage.getItem(`user_${loggedInUser.username}`));
+            if (userData.role !== 'admin') {
+                dashboard.classList.add('hidden');
+                return;
+            }
+
+            // تحميل الرسائل
+            const messages = JSON.parse(localStorage.getItem('contact_messages')) || [];
+            const messagesTable = document.querySelector('#messages-table tbody');
+            messagesTable.innerHTML = '';
+            messages.forEach(msg => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${msg.name}</td>
+                    <td>${msg.email}</td>
+                    <td>${msg.phone}</td>
+                    <td>${msg.message}</td>
+                    <td>${new Date(msg.timestamp).toLocaleString('ar-EG')}</td>
+                `;
+                messagesTable.appendChild(row);
+            });
+
+            // تحميل المستخدمين
+            const usersTable = document.querySelector('#users-table tbody');
+            usersTable.innerHTML = '';
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('user_')) {
+                    const user = JSON.parse(localStorage.getItem(key));
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.username}</td>
+                        <td>${user.fullname}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone}</td>
+                    `;
+                    usersTable.appendChild(row);
+                }
+            }
+
+            // تحميل سجل تسجيلات الدخول
+            const loginLogs = JSON.parse(localStorage.getItem('login_logs')) || [];
+            const loginLogsTable = document.querySelector('#login-logs-table tbody');
+            loginLogsTable.innerHTML = '';
+            loginLogs.forEach(log => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${log.username}</td>
+                    <td>${new Date(log.timestamp).toLocaleString('ar-EG')}</td>
+                `;
+                messagesTable.appendChild(row);
+            });
+        }
+
+        // أحداث التنقل
+        showLogin.addEventListener('click', () => showSection(loginSection));
+        showRegister.addEventListener('click', () => showSection(registerSection));
+
+        // التحقق عند تحميل الصفحة
+        checkAuth();
+        showSection(contactSection);
+    </script>
+</body>
+</html>

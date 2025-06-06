@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Enhanced ImageryTileLayer with 3D, Elevation Profile, Weather Effects, and More</title>
+
+  <script type="module" src="https://js.arcgis.com/calcite-components/2.11.1/calcite.esm.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.11.1/calcite.css"/>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+  <link rel="stylesheet" href="contactus.css">
+  <script src="https://js.arcgis.com/4.30/"></script>
+
+
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+    #rightPanel {
+      max-height: 98%;
+      overflow: hidden;
+    }
+    calcite-shell-panel {
+      --calcite-shell-panel-min-width: 320px;
+      --calcite-shell-panel-width: 320px;
+      --calcite-shell-panel-max-width: 60%;
+    }
+    #rendererPanel {
+      padding: 5px;
+      overflow: hidden;
+    }
+    .custom-widget {
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin: 5px;
+    }
+  </style>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/layers/ImageryTileLayer",
+      "esri/renderers/RasterShadedReliefRenderer",
+      "esri/smartMapping/raster/support/colorRamps",
+      "esri/widgets/ElevationProfile",
+      "esri/widgets/Measurement",
+      "esri/widgets/Search",
+      "esri/widgets/Daylight",
+      "esri/widgets/LayerList",
+      "esri/widgets/TimeSlider",
+      "esri/layers/GraphicsLayer",
+      "esri/Graphic",
+      "esri/widgets/BasemapToggle", // أداة تبديل الخريطة الأساسية
+      "esri/widgets/Compass", // أداة البوصلة
+      "esri/widgets/Home" // أداة العودة للوضع الافتراضي
+    ], (
+      Map, SceneView, ImageryTileLayer, RasterShadedReliefRenderer, colorRamps,
+      ElevationProfile, Measurement, Search, Daylight, LayerList, TimeSlider,
+      GraphicsLayer, Graphic, BasemapToggle, Compass, Home
+    ) => {
+
+      // إنشاء الخريطة مع الطبقة الأساسية
+      const map = new Map({
+        basemap: "gray-vector"
+      });
+
+      // إنشاء العرض ثلاثي الأبعاد
+      const view = new SceneView({
+        container: "viewDiv",
+        map: map,
+        zoom: 7,
+        center: [30.5, 27.8],
+        viewingMode: "global"
+      });
+
+      // إضافة طبقة التضاريس مع تأثير الظل
+      const url = "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer";
+      const renderer = new RasterShadedReliefRenderer({
+        altitude: 45,
+        azimuth: 315,
+        hillshadeType: "traditional",
+        zFactor: 1,
+        scalingType: "adjusted",
+        colorRamp: changeColorRamp("Elevation #1")
+      });
+
+      const layer = new ImageryTileLayer({
+        url,
+        renderer
+      });
+
+      map.add(layer);
+
+      // دالة لإنشاء تدرج لوني
+      function changeColorRamp(name) {
+        const colors = colorRamps.byName(name);
+        return colorRamps.createColorRamp(colors);
+      }
+
+    
+
+      // إضافة أداة البحث
+      const search = new Search({
+        view: view
+      });
+      view.ui.add(search, "top-left");
+
+      // إضافة أداة التحكم في الإضاءة
+      const daylight = new Daylight({
+        view: view,
+        playButtonVisible: true
+      });
+      view.ui.add(daylight, "bottom-right");
+
+      // إضافة أداة التحكم في الطبقات
+      const layerList = new LayerList({
+        view: view
+      });
+      view.ui.add(layerList, "top-left");
+
+    
+      // إضافة تأثيرات الطقس (مثال: المطر)
+      const weatherLayer = new GraphicsLayer();
+      map.add(weatherLayer);
+
+      const rainEffect = new Graphic({
+        geometry: {
+          type: "point",
+          longitude: 30.5,
+          latitude: 27.8
+        },
+        symbol: {
+          type: "picture-marker",
+          url: "https://static.arcgis.com/images/Symbols/Weather/Rain.png", // صورة تمثل المطر
+          width: "20px",
+          height: "20px"
+        }
+      });
+      weatherLayer.add(rainEffect);
+
+      // إضافة أداة تبديل الخريطة الأساسية
+      const basemapToggle = new BasemapToggle({
+        view: view,
+        nextBasemap: "satellite"
+      });
+      view.ui.add(basemapToggle, "bottom-left");
+
+      // إضافة أداة البوصلة
+      const compass = new Compass({
+        view: view
+      });
+      view.ui.add(compass, "top-left");
+
+      // إضافة أداة العودة للوضع الافتراضي
+      const home = new Home({
+        view: view
+      });
+      view.ui.add(home, "top-left");
+
+      // إضافة واجهة التحكم في الظل
+      const hillshadeTypeSelect = document.getElementById("hillshadeTypeSelect");
+      hillshadeTypeSelect.addEventListener("calciteSelectChange", (event) => {
+        const renderer = layer.renderer.clone();
+        renderer.hillshadeType = event.target.value;
+        layer.renderer = renderer;
+      });
+
+      const colorRampSelect = document.getElementById("colorRampSelect");
+      colorRampSelect.addEventListener("calciteSelectChange", (event) => {
+        const renderer = layer.renderer.clone();
+        renderer.colorRamp = changeColorRamp(event.target.value);
+        layer.renderer = renderer;
+      });
+
+      const zFactorSlider = document.getElementById("zFactorSlider");
+      zFactorSlider.addEventListener("calciteSliderInput", (event) => {
+        const renderer = layer.renderer.clone();
+        renderer.zFactor = event.target.value;
+        layer.renderer = renderer;
+      });
+
+      const altitudeSlider = document.getElementById("altitudeSlider");
+      altitudeSlider.addEventListener("calciteSliderInput", (event) => {
+        const renderer = layer.renderer.clone();
+        renderer.altitude = event.target.value;
+        layer.renderer = renderer;
+      });
+
+      const azimuthSlider = document.getElementById("azimuthSlider");
+      azimuthSlider.addEventListener("calciteSliderInput", (event) => {
+        const renderer = layer.renderer.clone();
+        renderer.azimuth = event.target.value;
+        layer.renderer = renderer;
+      });
+
+      // إضافة أداة التحكم في الشفافية
+      const opacitySlider = document.getElementById("opacitySlider");
+      opacitySlider.addEventListener("calciteSliderInput", (event) => {
+        layer.opacity = event.target.value / 100;
+      });
+    });
+  </script>
+</head>
+
+<body>
+    <!-- Header -->
+<header class="header">
+  <div class="logo">North Delta Lakes
+  </div>
+  <div class="search-bar">
+     <input type="text" placeholder="Search services...">
+     <button><i class="fas fa-search"></i></button>
+  </div>
+  <div class="actions">
+     <a href="loginn.html" class="btn">Login</a>
+     <a href="register2.html" class="btn">Register</a>
+     <div class="icon" id="dark-mode-toggle">
+        <i class="fas fa-moon"></i>
+     </div>
+     <div class="icon" id="menu-btn">
+        <i class="fas fa-bars"></i>
+     </div>
+  </div>
+</header>
+
+<footer class="footer">
+  © Copyright @ 2024 by <span>Ammar Mohamed Abdallah</span> | All Rights Reserved!
+</footer>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <span class="close-btn" id="close-btn"><i class="fas fa-times"></i></span>
+  <div class="profile">
+     <img src="f:\preoject developer\projectall\projectteam\icon\بحيرة_إدكو.jpg" alt="Minya Governorate Logo">
+     <h3>morphological change</h3>
+     <p>North Delta Lakes
+    </p>
+  </div>
+  <nav class="menu">
+    <a href="index2.html"><i class="fas fa-home"></i> Home</a>
+    <a href="screanshout.html"><i class="fas fa-question"></i> Screanshout</a>
+    <a href="service.html"><i class="fas fa-graduation-cap"></i> Services</a>
+    <a href="contactus.html"><i class="fas fa-headset"></i> Contact Us</a>
+  </nav>
+</div>
+
+  <calcite-shell content-behind>
+    <div id="viewDiv"></div>
+    <calcite-shell-panel slot="panel-end" display-mode="float">
+      <calcite-panel id="rendererPanel" heading="Shaded Relief Parameters">
+        <calcite-label> Select Type:
+          <calcite-select id="hillshadeTypeSelect">
+            <calcite-option value="traditional">traditional</calcite-option>
+            <calcite-option value="multi-directional">multi-directional</calcite-option>
+          </calcite-select>
+        </calcite-label>
+        <calcite-label> Select Color Ramp:
+          <calcite-select id="colorRampSelect"></calcite-select>
+        </calcite-label>
+        <calcite-label> Exaggeration Factor:
+          <calcite-slider id="zFactorSlider" value="1" label-handles label-ticks max="10" min="1" ticks="1"></calcite-slider>
+        </calcite-label>
+        <calcite-label> Sun Altitude:
+          <calcite-slider id="altitudeSlider" value="45" label-handles label-ticks max="90" min="0" max-label="90" min-label="0" ticks="90"></calcite-slider>
+        </calcite-label>
+        <calcite-label> Sun Azimuth:
+          <calcite-slider id="azimuthSlider" value="315" label-handles max="360" min="0"></calcite-slider>
+        </calcite-label>
+        <calcite-label> Layer Opacity:
+          <calcite-slider id="opacitySlider" value="100" label-handles max="100" min="0"></calcite-slider>
+        </calcite-label>
+      </calcite-panel>
+    </calcite-shell-panel>
+  </calcite-shell>
+  
+  <script src="index.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Contact Us - Minya Wind Energy</title>
+   <!-- Font Awesome CSS -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+   <!-- Custom CSS -->
+   <link rel="stylesheet" href="contactus.css">
+</head>
+<body>
+   <!-- Header -->
+   <header class="header">
+      <a href="index.html" class="logo">Minya Wind Energy</a>
+      <div class="search-bar">
+         <input type="text" placeholder="Search services..." id="search-input">
+         <button><i class="fas fa-search"></i></button>
+      </div>
+      <div class="actions">
+         <a href="login.html" class="btn">Login</a>
+         <a href="register.html" class="btn">Register</a>
+         <span class="icon" id="dark-mode-toggle"><i class="fas fa-moon"></i></span>
+         <span class="icon" id="menu-btn"><i class="fas fa-bars"></i></span>
+      </div>
+   </header>
+
+   <!-- Sidebar -->
+   <div class="sidebar" id="sidebar">
+      <span class="close-btn" id="close-btn"><i class="fas fa-times"></i></span>
+      <div class="profile">
+         <img src="f:\preoject developer\projectall\projectteam\icon\بحيرة_إدكو.jpg" alt="Minya Governorate Logo">
+         <h3>Minya Governorate</h3>
+         <p>Wind Energy</p>
+      </div>
+      <nav class="menu">
+        <a href="index2.html"><i class="fas fa-home"></i> Home</a>
+        <a href="screanshout.html"><i class="fas fa-question"></i> Screanshout</a>
+        <a href="service.html"><i class="fas fa-graduation-cap"></i> Services</a>
+        <a href="contactus.html"><i class="fas fa-headset"></i> Contact Us</a>
+      </nav>
+   </div>
+
+   <!-- Main Content -->
+   <main class="main-content" id="main-content">
+      <section class="contact">
+         <h1 class="heading">Contact Us</h1>
+         <div class="row">
+            <!-- Contact Form -->
+            <div class="form-container">
+               <h3>Get in Touch</h3>
+               <form id="contact-form">
+                  <input type="text" name="name" placeholder="Your Name" required maxlength="50">
+                  <input type="email" name="email" placeholder="Your Email" required maxlength="50">
+                  <input type="tel" name="number" placeholder="Your Number" required maxlength="15">
+                  <textarea name="message" placeholder="Your Message" required maxlength="1000"></textarea>
+                  <button type="submit" class="inline-btn">Send Message</button>
+               </form>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="info-container">
+               <div class="info-box">
+                  <i class="fas fa-phone"></i>
+                  <h3>Phone</h3>
+                  <a href="tel:1234567890">123-456-7890</a>
+                  <a href="tel:1112223333">111-222-3333</a>
+               </div>
+               <div class="info-box">
+                  <i class="fas fa-envelope"></i>
+                  <h3>Email</h3>
+                  <a href="mailto:shaikhanas@gmail.com">shaikhanas@gmail.com</a>
+                  <a href="mailto:anasbhai@gmail.com">anasbhai@gmail.com</a>
+               </div>
+               <div class="info-box">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <h3>Address</h3>
+                  <a href="#" id="map-toggle">Minya Governorate, Egypt</a>
+               </div>
+            </div>
+         </div>
+
+         <!-- Interactive Map -->
+         <div class="map-container" id="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3523961.489589842!2d29.2675469!3d30.3292364!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f7e2e5e8c!2sMinya%2C%20Egypt!5e0!3m2!1sen!2seg!4v16987654321" allowfullscreen="" loading="lazy"></iframe>
+         </div>
+      </section>
+   </main>
+
+   <!-- Footer -->
+   <footer class="footer">
+      © Copyright @ 2024 by <span>Ammar Mohamed Abdallah</span> | All Rights Reserved!
+   </footer>
+
+   <!-- Custom JavaScript -->
+   <script src="contactus.js"></script>
+</body>
+</html>

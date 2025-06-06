@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تحليل التغيرات المورفولوجية للبحيرات المصرية</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #f4f4f9;
+      color: #333;
+      direction: rtl;
+    }
+
+    #map {
+      flex: 1;
+      height: 100vh;
+      background-color: #e0e0e0;
+    }
+
+    .analytics-panel {
+      width: 600px;
+      background-color: #34495e;
+      color: #fff;
+      padding: 20px;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+
+    .analytics-panel h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #1abc9c;
+    }
+
+    .statistics {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #2c3e50;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .statistics h4 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #1abc9c;
+    }
+
+    .statistics p {
+      font-size: 1rem;
+      color: #ecf0f1;
+    }
+
+    .lake-description {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #2c3e50;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .lake-description img {
+      width: 100%;
+      max-width: 200px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .lake-description h3 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #1abc9c;
+    }
+
+    .lake-description p {
+      font-size: 1rem;
+      color: #ecf0f1;
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      background-color: #2c3e50;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-container canvas {
+      max-width: 100%;
+    }
+
+    .form-range {
+      width: 100%;
+    }
+
+    .btn-primary {
+      background-color: #1abc9c;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #fff;
+      border-radius: 8px;
+      transition: background-color 0.3s;
+    }
+
+    .btn-primary:hover {
+      background-color: #16a085;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      .analytics-panel {
+        width: 100%;
+        height: auto;
+      }
+
+      #map {
+        height: 50vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div class="analytics-panel">
+    <h2>تحليل التغيرات المورفولوجيا</h2>
+
+    <div class="mb-4">
+      <label for="yearSlider">اختر السنة:</label>
+      <input type="range" id="yearSlider" min="2013" max="2025" value="2013" step="6" class="form-range">
+      <span id="selectedYear">2013</span>
+      <div id="lakeAreas" class="mt-2" style="color: #ecf0f1;"></div>
+    </div>
+
+    <div class="statistics">
+      <h4>إحصائيات عامة</h4>
+      <p>إجمالي مساحة البحيرات: <span id="totalArea">--- كم²</span></p>
+      <p>أكبر بحيرة: <span id="largestLake">---</span></p>
+      <p>أصغر بحيرة: <span id="smallestLake">---</span></p>
+    </div>
+    <button onclick="startRoutePlanning()" class="btn btn-primary mt-3">بدء تخطيط المسار</button>
+    <button onclick="loadNetwork()" class="btn btn-primary mt-3">تحميل شبكة الطرق</button>
+    <button onclick="startServiceAreaAnalysis()" class="btn btn-primary mt-3">تحليل نطاق الخدمة</button>
+    <button onclick="exportDrawnNetwork()" class="btn btn-primary mt-3">تصدير شبكة الطرق (GeoJSON)</button>
+    <input type="file" id="fileInput" accept=".geojson" class="mt-3">
+
+    <div id="lake1" class="lake-description">
+      <img src="f:\preoject developer\projectall\projectteam\icon\بحيره_البرلس.jpg" alt="بحيرة البرلس">
+      <h3>بحيرة البرلس</h3>
+      <p>بحيرة البرلس هي واحدة من أكبر البحيرات في مصر، وتقع في شمال الدلتا.</p>
+      <div class="chart-container"><canvas id="chart1"></canvas></div>
+      <div class="chart-container"><canvas id="pieChart1"></canvas></div>
+    </div>
+    <div id="lake2" class="lake-description">
+      <img src="f:\preoject developer\projectall\projectteam\icon\hglk.gi.jpg" alt="بحيرة المنزلة">
+      <h3>بحيرة المنزلة</h3>
+      <p>بحيرة المنزلة هي بحيرة ساحلية تقع في شمال شرق مصر.</p>
+      <div class="chart-container"><canvas id="chart2"></canvas></div>
+      <div class="chart-container"><canvas id="pieChart2"></canvas></div>
+    </div>
+    <div id="lake3" class="lake-description">
+      <img src="f:\preoject developer\projectall\projectteam\icon\بحيرة_إدكو.jpg" alt="بحيرة إدكو">
+      <h3>بحيرة إدكو</h3>
+      <p>بحيرة إدكو هي بحيرة ساحلية تقع في شمال مصر.</p>
+      <div class="chart-container"><canvas id="chart3"></canvas></div>
+      <div class="chart-container"><canvas id="pieChart3"></canvas></div>
+    </div>
+    <div id="lake4" class="lake-description">
+      <img src="f:\preoject developer\projectall\projectteam\icon\بحيره مريوط.jpg" alt="بحيرة مريوط">
+      <h3>بحيرة مريوط</h3>
+      <p>بحيرة مريوط هي بحيرة تقع في شمال غرب مصر.</p>
+      <div class="chart-container"><canvas id="chart4"></canvas></div>
+      <div class="chart-container"><canvas id="pieChart4"></canvas></div>
+    </div>
+
+    <div class="chart-container">
+      <h3>التغير في مساحة جميع البحيرات</h3>
+      <canvas id="overallChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h3>توزيع مساحة البحيرات</h3>
+      <canvas id="overallPieChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h3>المساحة السنوية للبحيرات</h3>
+      <canvas id="barChart"></canvas>
+    </div>
+
+    <button id="exportData" class="btn btn-primary mt-4">تصدير البيانات كملف CSV</button>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+  <script>
+    const lakeData = {
+      2013: { البرلس: 403, المنزلة: 680, إدكو: 16.92, مريوط: 139 },
+      2019: { البرلس: 427, المنزلة: 568, إدكو: 54, مريوط: 112 },
+      2025: { البرلس: 409, المنزلة: 602, إدكو: 56.4, مريوط: 85 }
+    };
+
+    const map = L.map('map').setView([31.0, 30.0], 7);
+
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    const esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: ' ',
+      maxZoom: 19
+    });
+
+    const esriTopographic = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri',
+      maxZoom: 19
+    });
+
+    const esriStreets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri',
+      maxZoom: 19
+    });
+
+    const googleSatLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '© Google Maps',
+      maxZoom: 20
+    });
+
+    const baseMaps = {
+      "خريطة الشوارع (OSM)": osmLayer,
+      "صور الأقمار الصناعية (Esri)": esriWorldImagery,
+      "خريطة طبوغرافية (Esri)": esriTopographic,
+      "شوارع العالم (Esri)": esriStreets,
+      "صور الأقمار الصناعية (Google)": googleSatLayer
+    };
+
+    L.control.layers(baseMaps).addTo(map);
+
+    const lakes = {
+      البرلس: { coords: [31.496459, 30.8200238], area: 403 },
+      المنزلة: { coords: [31.320063, 32.071449], area: 680 },
+      إدكو: { coords: [31.247885, 30.230896], area: 16.92 },
+      مريوط: { coords: [31.162286, 29.907486], area: 139 }
+    };
+
+    Object.keys(lakes).forEach(lake => {
+      L.marker(lakes[lake].coords).addTo(map)
+        .bindPopup(`<b>${lake}</b><br>المساحة: ${lakes[lake].area} كم²`);
+    });
+
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+      draw: {
+        polyline: { 
+          shapeOptions: { 
+            color: 'red', 
+            weight: 3 
+          },
+          allowIntersection: false,
+          showLength: true
+        },
+        polygon: true,
+        circle: true,
+        rectangle: true,
+        marker: true,
+        circlemarker: true
+      },
+      edit: {
+        featureGroup: drawnItems
+      }
+    });
+    map.addControl(drawControl);
+
+    map.on('draw:created', function (e) {
+      const layer = e.layer;
+      drawnItems.addLayer(layer);
+    });
+
+    const yearSlider = document.getElementById('yearSlider');
+    const selectedYear = document.getElementById('selectedYear');
+    const totalArea = document.getElementById('totalArea');
+    const largestLake = document.getElementById('largestLake');
+    const smallestLake = document.getElementById('smallestLake');
+    const lakeAreas = document.getElementById('lakeAreas');
+
+    const ctx1 = document.getElementById('chart1').getContext('2d');
+    const ctx2 = document.getElementById('chart2').getContext('2d');
+    const ctx3 = document.getElementById('chart3').getContext('2d');
+    const ctx4 = document.getElementById('chart4').getContext('2d');
+    const ctxOverall = document.getElementById('overallChart').getContext('2d');
+    const ctxPie1 = document.getElementById('pieChart1').getContext('2d');
+    const ctxPie2 = document.getElementById('pieChart2').getContext('2d');
+    const ctxPie3 = document.getElementById('pieChart3').getContext('2d');
+    const ctxPie4 = document.getElementById('pieChart4').getContext('2d');
+    const ctxOverallPie = document.getElementById('overallPieChart').getContext('2d');
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+
+    const chart1 = new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels: Object.keys(lakeData),
+        datasets: [{
+          label: 'بحيرة البرلس',
+          data: Object.values(lakeData).map(year => year.البرلس),
+          borderColor: '#1abc9c',
+          fill: false,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'التغير في مساحة بحيرة البرلس' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'المساحة (كم²)' } }, x: { title: { display: true, text: 'السنة' } } }
+      }
+    });
+
+    const chart2 = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: Object.keys(lakeData),
+        datasets: [{
+          label: 'بحيرة المنزلة',
+          data: Object.values(lakeData).map(year => year.المنزلة),
+          borderColor: '#3498db',
+          fill: false,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'التغير في مساحة بحيرة المنزلة' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'المساحة (كم²)' } }, x: { title: { display: true, text: 'السنة' } } }
+      }
+    });
+
+    const chart3 = new Chart(ctx3, {
+      type: 'line',
+      data: {
+        labels: Object.keys(lakeData),
+        datasets: [{
+          label: 'بحيرة إدكو',
+          data: Object.values(lakeData).map(year => year.إدكو),
+          borderColor: '#9b59b6',
+          fill: false,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'التغير في مساحة بحيرة إدكو' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'المساحة (كم²)' } }, x: { title: { display: true, text: 'السنة' } } }
+      }
+    });
+
+    const chart4 = new Chart(ctx4, {
+      type: 'line',
+      data: {
+        labels: Object.keys(lakeData),
+        datasets: [{
+          label: 'بحيرة مريوط',
+          data: Object.values(lakeData).map(year => year.مريوط),
+          borderColor: '#e74c3c',
+          fill: false,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'التغير في مساحة بحيرة مريوط' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'المساحة (كم²)' } }, x: { title: { display: true, text: 'السنة' } } }
+      }
+    });
+
+    const overallChart = new Chart(ctxOverall, {
+      type: 'line',
+      data: {
+        labels: Object.keys(lakeData),
+        datasets: [
+          { label: 'البرلس', data: Object.values(lakeData).map(year => year.البرلس), borderColor: '#1abc9c', fill: false, tension: 0.4 },
+          { label: 'المنزلة', data: Object.values(lakeData).map(year => year.المنزلة), borderColor: '#3498db', fill: false, tension: 0.4 },
+          { label: 'إدكو', data: Object.values(lakeData).map(year => year.إدكو), borderColor: '#9b59b6', fill: false, tension: 0.4 },
+          { label: 'مريوط', data: Object.values(lakeData).map(year => year.مريوط), borderColor: '#e74c3c', fill: false, tension: 0.4 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'التغير في مساحة جميع البحيرات' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'المساحة (كم²)' } }, x: { title: { display: true, text: 'السنة' } } }
+      }
+    });
+
+    const pieChart1 = new Chart(ctxPie1, {
+      type: 'pie',
+      data: {
+        labels: ['البرلس', 'المنزلة', 'إدكو', 'مريوط'],
+        datasets: [{ data: [403, 680, 16.92, 139], backgroundColor: ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c'] }]
+      },
+      options: { responsive: true, plugins: { title: { display: true, text: 'توزيع مساحة البحيرات (2013)' } } }
+    });
+
+    const pieChart2 = new Chart(ctxPie2, {
+      type: 'pie',
+      data: {
+        labels: ['البرلس', 'المنزلة', 'إدكو', 'مريوط'],
+        datasets: [{ data: [427, 568, 54, 112], backgroundColor: ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c'] }]
+      },
+      options: { responsive: true, plugins: { title: { display: true, text: 'توزيع مساحة البحيرات (2019)' } } }
+    });
+
+    const pieChart3 = new Chart(ctxPie3, {
+      type: 'pie',
+      data: {
+        labels: ['البرلس', 'المنزلة', 'إدكو', 'مريوط'],
+        datasets: [{ data: [409, 602, 56.4, 85], backgroundColor: ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c'] }]
+      },
+      options: { responsive: true, plugins: { title: { display: true, text: 'توزيع مساحة البحيرات (2025)' } } }
+    });
+
+    const pieChart4 = new Chart(ctxPie4, {
+      type: 'pie',
+      data: {
+        labels: ['البرلس', 'المنزلة', 'إدكو', 'مريوط'],
+        datasets: [{ data: [403, 680, 16.92, 139], backgroundColor: ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c'] }]
+      },
+      options: { responsive: true, plugins: { title: { display: true, text: 'توزيع مساحة البحيرات (2013)' } } }
+    });
+
+    const overallPieChart = new Chart(ctxOverallPie, {
+      type: 'pie',
+      data: {
+        labels: ['البرلس', 'المنزلة', 'إدكو', 'مريوط'],
+        datasets: [{ data: [403, 680, 16.92, 139], backgroundColor: ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c'] }]
+      },
+      options: { responsive: true, plugins: { title: { display: true, text: 'توزيع مساحة البحيرات (2013)' } } }
+    });
+
+    const barChart = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(lakeData),
+        datasets: [
+          { label: 'البرلس', data: Object.values(lakeData).map(year => year.البرلس), backgroundColor: '#1abc9c' },
+          { label: 'المنزلة', data: Object.values(lakeData).map(year => year.المنزلة), backgroundColor: '#3498db' },
+          { label: 'إدكو', data: Object.values(lakeData).map(year => year.إدكو), backgroundColor: '#9b59b6' },
+          { label: 'مريوط', data: Object.values(lakeData).map(year => year.مريوط), backgroundColor: '#e74c3c' }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'المساحة السنوية للبحيرات' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'المساحة (كم²)' } }, x: { title: { display: true, text: 'السنة' } } }
+      }
+    });
+
+    function updateLakeAreas(year) {
+      const data = lakeData[year];
+      lakeAreas.innerHTML = `
+        البرلس: ${data.البرلس} كم²<br>
+        المنزلة: ${data.المنزلة} كم²<br>
+        إدكو: ${data.إدكو} كم²<br>
+        مريوط: ${data.مريوط} كم²
+      `;
+      overallPieChart.data.datasets[0].data = [data.البرلس, data.المنزلة, data.إدكو, data.مريوط];
+      overallPieChart.options.plugins.title.text = `توزيع مساحة البحيرات (${year})`;
+      overallPieChart.update();
+    }
+
+    yearSlider.addEventListener('input', (e) => {
+      const year = e.target.value;
+      selectedYear.textContent = year;
+
+      const areas = Object.values(lakeData[year]);
+      const total = areas.reduce((sum, area) => sum + area, 0);
+      const largest = Math.max(...areas);
+      const smallest = Math.min(...areas);
+
+      totalArea.textContent = `${total.toFixed(2)} كم²`;
+      largestLake.textContent = Object.keys(lakeData[year]).find(key => lakeData[year][key] === largest);
+      smallestLake.textContent = Object.keys(lakeData[year]).find(key => lakeData[year][key] === smallest);
+      updateLakeAreas(year);
+    });
+
+    updateLakeAreas(2013);
+    totalArea.textContent = `${403 + 680 + 16.92 + 139} كم²`;
+    largestLake.textContent = 'المنزلة';
+    smallestLake.textContent = 'إدكو';
+
+    document.getElementById('exportData').addEventListener('click', () => {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "السنة,بحيرة البرلس,بحيرة المنزلة,بحيرة إدكو,بحيرة مريوط\n";
+      Object.keys(lakeData).forEach(year => {
+        csvContent += `${year},${lakeData[year].البرلس},${lakeData[year].المنزلة},${lakeData[year].إدكو},${lakeData[year].مريوط}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'lake_data.csv');
+      document.body.appendChild(link);
+      link.click();
+    });
+
+    let routingControl = null;
+    let startMarker = null;
+    let endMarker = null;
+    let startCoords = null;
+    let endCoords = null;
+    let serviceAreaLayer = null;
+    let networkLayer = null;
+
+    function startRoutePlanning() {
+      if (startMarker) map.removeLayer(startMarker);
+      if (endMarker) map.removeLayer(endMarker);
+      if (routingControl) map.removeControl(routingControl);
+
+      startCoords = null;
+      endCoords = null;
+
+      alert("الرجاء تحديد نقطة البداية ثم نقطة النهاية على الخريطة.");
+      map.on('click', onMapClick);
+    }
+
+    function onMapClick(e) {
+      const { lat, lng } = e.latlng;
+      if (!startCoords) {
+        startCoords = [lat, lng];
+        startMarker = L.marker(startCoords).addTo(map).bindPopup("نقطة البداية").openPopup();
+      } else if (!endCoords) {
+        endCoords = [lat, lng];
+        endMarker = L.marker(endCoords).addTo(map).bindPopup("نقطة النهاية").openPopup();
+        calculateRoute(startCoords, endCoords);
+        map.off('click', onMapClick);
+      }
+    }
+
+    function calculateRoute(start, end) {
+      if (routingControl) map.removeControl(routingControl);
+      routingControl = L.Routing.control({
+        waypoints: [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])],
+        routeWhileDragging: true
+      }).addTo(map);
+
+      routingControl.on('routesfound', function (e) {
+        const routes = e.routes;
+        const route = routes[0];
+        const distance = (route.summary.totalDistance / 1000).toFixed(2);
+        const time = (route.summary.totalTime / 60).toFixed(2);
+        alert(`المسافة: ${distance} كم\nالوقت المقدر: ${time} دقيقة`);
+      });
+    }
+
+    function loadNetwork() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("الرجاء تحميل ملف GeoJSON.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const networkData = JSON.parse(e.target.result);
+        if (networkLayer) map.removeLayer(networkLayer); 
+        networkLayer = L.geoJSON(networkData, { style: { color: 'blue', weight: 3 } }).addTo(map);
+        map.fitBounds(networkLayer.getBounds()); 
+        alert("تم تحميل شبكة الطرق بنجاح.");
+      };
+      reader.readAsText(file);
+    }
+
+    function startServiceAreaAnalysis() {
+      if (serviceAreaLayer) map.removeLayer(serviceAreaLayer);
+      alert("اضغط على الخريطة لتحديد نقطة مركز نطاق الخدمة.");
+      map.on('click', onServiceAreaClick);
+    }
+
+    function onServiceAreaClick(e) {
+      const { lat, lng } = e.latlng;
+      const radius = prompt("أدخل نصف قطر نطاق الخدمة (بالكيلومترات):", "5");
+      if (radius && !isNaN(radius)) {
+        const radiusInMeters = radius * 1000; 
+        serviceAreaLayer = L.circle([lat, lng], {
+          radius: radiusInMeters,
+          color: '#ff7800',
+          fillColor: '#ff7800',
+          fillOpacity: 0.2
+        }).addTo(map).bindPopup(`نطاق الخدمة: ${radius} كم`).openPopup();
+        map.off('click', onServiceAreaClick);
+      }
+    }
+
+    function exportDrawnNetwork() {
+      if (drawnItems.getLayers().length === 0) {
+        alert("لا توجد شبكات طرق مرسومة لتصديرها!");
+        return;
+      }
+      const geojson = drawnItems.toGeoJSON();
+      const geojsonString = JSON.stringify(geojson, null, 2);
+      const blob = new Blob([geojsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'drawn_network.geojson';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

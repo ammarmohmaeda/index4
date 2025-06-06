@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Update a renderer's attribute | Sample | ArcGIS Maps SDK for JavaScript 4.32</title>
+
+  <!-- Load Calcite components from CDN -->
+  <script type="module" src="https://js.arcgis.com/calcite-components/3.0.3/calcite.esm.js"></script>
+
+  <!-- Load the ArcGIS Maps SDK for JavaScript from CDN -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.32/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.32/"></script>
+  <script src="index.js"></script>
+  <script src="script3.js"></script>
+  <script src="project.js"></script>
+
+
+
+  <!-- Load Map components from CDN-->
+  <script type="module"
+    src="https://js.arcgis.com/map-components/4.32/arcgis-map-components.esm.js"></script>
+<link rel="stylesheet" href="index.css">
+<link rel="stylesheet" href="style2.css">
+<link rel="stylesheet" href="style3.css">
+
+
+</head>
+
+<body>
+  <calcite-shell>
+    <arcgis-map item-id="74a5a5d2e6784ef19578cbce8c808886">
+      <arcgis-legend position="top-left"></arcgis-legend>
+    </arcgis-map>
+    <calcite-shell-panel id="slider-panel" slot="panel-bottom" layout="horizontal">
+      <arcgis-time-slider layout="auto" mode="instant" reference-element="arcgis-map"></arcgis-time-slider>
+    </calcite-shell-panel>
+  </calcite-shell>
+
+    <!-- رأس الصفحة -->
+    <header class="header">
+      <div class="logo">
+          <i class="fas fa-map-marked-alt"></i>
+          <span class="ar-text">جيوماب</span>
+          <span class="en-text" style="display: none;">GeoMap</span>
+      </div>
+      
+      <div class="search-bar">
+          <input type="text" class="ar-text" placeholder="ابحث عن خدمات خرائط...">
+          <input type="text" class="en-text" placeholder="Search for mapping services..." style="display: none;">
+          <button type="submit"><i class="fas fa-search"></i></button>
+      </div>
+      
+      <div class="auth-buttons">
+          <a href="loginn.html" class="btn btn-login">
+              <i class="fas fa-sign-in-alt"></i>
+              <span class="ar-text">تسجيل الدخول</span>
+              <span class="en-text" style="display: none;">Login</span>
+          </a>
+          <a href="register2.html" class="btn btn-register">
+              <i class="fas fa-user-plus"></i>
+              <span class="ar-text">إنشاء حساب</span>
+              <span class="en-text" style="display: none;">Register</span>
+          </a>
+      </div>
+      
+      <div class="actions">
+          <div class="language-switcher" id="language-switcher">
+              <img src="https://flagcdn.com/w20/gb.png" alt="English" class="en-flag">
+              <span class="ar-text">English</span>
+              <span class="en-text" style="display: none;">العربية</span>
+          </div>
+          <div class="icon menu-toggle">
+              <i class="fas fa-bars"></i>
+          </div>
+          <div class="icon">
+              <i class="fas fa-moon" id="theme-toggle"></i>
+          </div>
+      </div>
+  </header>
+
+  <!-- القائمة الجانبية -->
+  <aside class="sidebar">
+      <div class="close-btn">
+          <i class="fas fa-times"></i>
+      </div>
+      
+      <div class="profile">
+          <img src="f:\preoject developer\projectall\projectteam\icon\البحيرات.jpg" alt="صورة المستخدم">
+          <h3 class="ar-text">التغيرات الموروفولجيا</h3>
+          <h3 class="en-text" style="display: none;">Morphological Changes</h3>
+          <p class="ar-text">للبحيرات الشماليه للدلتا</p>
+          <p class="en-text" style="display: none;">For Northern Delta Lakes</p>
+      </div>
+      
+      <div class="menu">
+          <a href="#" class="active">
+              <i class="fas fa-home"></i>
+              <span class="ar-text">الرئيسية</span>
+              <span class="en-text" style="display: none;">Home</span>
+          </a>
+          <a href="index4.html">
+              <i class="fas fa-map"></i>
+              <span class="ar-text">الخرائط التفاعلية</span>
+              <span class="en-text" style="display: none;">Interactive Maps</span>
+          </a>
+          <a href="#">
+              <i class="fas fa-layer-group"></i>
+              <span class="ar-text">نظم المعلومات الجغرافية</span>
+              <span class="en-text" style="display: none;">GIS</span>
+          </a>
+          <a href="3d.html">
+              <i class="fas fa-chart-bar"></i>
+              <span class="ar-text">التحليل المكاني</span>
+              <span class="en-text" style="display: none;">Spatial Analysis</span>
+          </a>
+          <a href="contactus.html">
+              <i class="fas fa-cog"></i>
+              <span class="ar-text">التحدث معنا</span>
+              <span class="en-text" style="display: none;">Contact Us</span>
+          </a>
+          <a href="#">
+              <i class="fas fa-sign-out-alt"></i>
+              <span class="ar-text">تسجيل الخروج</span>
+              <span class="en-text" style="display: none;">Logout</span>
+          </a>
+      </div>
+  </aside>
+
+</body>
+
+<script>
+  const yearSlider = document.querySelector("arcgis-time-slider");
+  const arcgisMap = document.querySelector("arcgis-map");
+
+  yearSlider.fullTimeExtent = {
+    start: new Date(1880, 0, 1),
+    end: new Date(2018, 0, 1)
+  };
+  yearSlider.timeExtent = {
+    start: new Date(1880, 0, 1),
+    end: new Date(1880, 0, 1)
+  };
+  yearSlider.stops = {
+    interval: {
+      value: 1,
+      unit: "years"
+    }
+  };
+  arcgisMap.timeExtent = yearSlider.timeExtent;
+
+  arcgisMap.addEventListener("arcgisViewReadyChange", async () => {
+    const view = arcgisMap.view;
+    const layer = view.map.layers.getItemAt(0);
+    const renderer = layer.renderer.clone();
+
+    const sizeVisualVariable = renderer.visualVariables.find(
+      visualVariable => visualVariable.type === "size"
+    );
+
+    // Returns the value of the "F{year}" field based on the slider's value.
+    // This expression will re-execute every time the slider's value changes
+    const valueExpression = `
+      Expects($feature, "F*");
+      if(HasValue($view, ["timeProperties", "currentEnd"])){
+        var y = Year($view.timeProperties.currentEnd);
+        var value = $feature["F" + y];
+        return value;
+      }
+      return null;
+    `;
+    // Update legend text to be more user friendly
+    const valueExpressionTitle = "Are temperatures significantly warmer or colder than normal?";
+
+    // Replace the field with the valueExpression so the user can dynamically
+    // explore the data as it changed from year to year
+    renderer.field = null;
+    renderer.valueExpression = valueExpression;
+    renderer.valueExpressionTitle = valueExpressionTitle;
+
+    // Since this is an above-and-below size renderer, we need to update
+    // the size visual variable to reflect the new valueExpression
+    sizeVisualVariable.field = null;
+    sizeVisualVariable.valueExpression = valueExpression;
+    sizeVisualVariable.valueExpressionTitle = valueExpressionTitle;
+    // Update legend text to be more user friendly
+    sizeVisualVariable.stops[0].label = "Colder";
+    sizeVisualVariable.stops[2].label = "Normal";
+    sizeVisualVariable.stops[4].label = "Warmer";
+
+    renderer.visualVariables = [sizeVisualVariable];
+    layer.renderer = renderer;
+  });
+  
+</script>
+
+</html>

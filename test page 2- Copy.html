@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معرض خرائط دلتا الشمال</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 4px;
+            background: #2ecc71;
+            z-index: 2000;
+            transition: width 0.3s ease;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header .logo {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .header .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .header .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .header .nav-links a:hover {
+            color: #dfe6e9;
+        }
+
+        .maps-gallery {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .maps-gallery h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .search-bar {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .search-bar input {
+            padding: 0.5rem 1rem;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .search-bar button {
+            padding: 0.5rem 1rem;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .search-bar button:hover {
+            background: #2980b9;
+        }
+
+        .view-toggle {
+            margin-bottom: 2rem;
+        }
+
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #3498db;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: background 0.3s ease;
+        }
+
+        .view-toggle button:hover {
+            background: #2980b9;
+        }
+
+        .view-toggle button.active {
+            background: #2ecc71;
+        }
+
+        .maps-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .maps-container.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .map-card {
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .map-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .map-card img {
+            width: 100%;
+            height: 750px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .map-card:hover img {
+            transform: scale(1.15);
+        }
+
+        .map-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .map-content h2 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .map-content p {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .map-content .details-btn {
+            padding: 0.5rem 1rem;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .map-content .details-btn:hover {
+            background: #2980b9;
+        }
+
+        .map-card:nth-child(1) h2 { color: #3498db; }
+        .map-card:nth-child(2) h2 { color: #2ecc71; }
+        .map-card:nth-child(3) h2 { color: #e67e22; }
+        .map-card:nth-child(4) h2 { color: #f1c40f; }
+
+        .map-card::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .map-card:hover::after {
+            opacity: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal img {
+            max-width: 100%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .modal .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            color: #fff;
+            background: #3498db;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .modal .close-btn:hover {
+            background: #2980b9;
+        }
+
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 0.8rem;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            transition: background 0.3s ease;
+        }
+
+        .scroll-top:hover {
+            background: #2980b9;
+        }
+
+        .footer {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 2rem;
+            text-align: center;
+            color: #dfe6e9;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer p {
+            font-size: 1rem;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        .footer a:hover {
+            color: #dfe6e9;
+        }
+
+        @media (max-width: 768px) {
+            .maps-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .maps-gallery h1 {
+                font-size: 2rem;
+            }
+
+            .map-card img {
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .maps-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .map-card img {
+                height: 150px;
+            }
+
+            .search-bar input {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div id="progress-bar"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">خرائط دلتا الشمال</div>
+        <div class="nav-links">
+            <a href="index4.html">الرئيسية</a>
+            <a href="#gallery">المعرض</a>
+            <a href="promblems.html">اتصل بنا</a>
+        </div>
+        <select id="language-switcher">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+        </select>
+    </header>
+
+    <!-- Maps Gallery -->
+    <section class="maps-gallery" id="gallery">
+        <h1>استكشف خرائط دلتا الشمال</h1>
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="ابحث عن الخرائط بالاسم...">
+            <button id="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="view-toggle">
+            <button id="grid-view" class="active">عرض شبكي</button>
+            <button id="list-view">عرض قائمة</button>
+        </div>
+        <div class="maps-container">
+            <div class="map-card" data-tooltip="خريطة طوبوغرافية 2025">
+                <img src="mapss\Om\lswi brols.jpg">
+                <div class="map-content">
+                    <h2>مؤشر رطوبة التربة والغطاء النباتي (LSWI) لبحيرة البرلس</h2>
+                    <p>كانت المناطق المحيطة بالبحيرة في عام 2013 تتسم بانتشار واسع للمناطق منخفضة الرطوبة مقارنة بالمناطق المرتفعة ومع التقدم إلى عام 2019 بدأت المناطق مرتفعة الرطوبة في التوسع داخل نطاق البحيرة والمناطق المحيطة خاصة من الجهة الجنوبية والجنوبية الغربية مما يشير إلى زيادة في النشاط المائي أو تحسن في الرطوبة نتيجة التغيرات البيئية أو تدخلات بشرية بحلول عام 2025 أصبح انتشار المناطق مرتفعة الرطوبة أكثر وضوحًا داخل حدود البحيرة وتقلصت المساحات ذات الرطوبة المنخفضة بشكل ملحوظ</p>
+                    <button class="details-btn" data-img="mapss\Om\lswi brols.jpg">عرض التفاصيل</button>
+                </div>
+            </div>
+            <div class="map-card" data-tooltip="خريطة الغطاء النباتي 2025">
+                <img src="mapss\Om\lswi edco.jpg">
+                <div class="map-content">
+                    <h2>مؤشر رطوبة التربة والغطاء النباتي (LSWI) لبحيرة ادكو</h2>
+                    <p>في عام 2013 كانت بحيرة ادكو محاطة بغطاء واسع من المناطق مرتفعة الرطوبة داخل وخارج حدودها لكن لوحظ وجود جيوب من المناطق منخفضة الرطوبة خاصة داخل البحيرة نحو عام 2019 بدأت هذه الجيوب تتوسع تدريجيًا داخل حدود البحيرة مع تقلص المناطق المرتفعة الرطوبة ما يشير إلى بداية تدهور في الحالة الرطبة وزيادة في الجفاف أو تراجع في الموارد المائية بحلول عام 2025 تغير الوضع كليًا حيث أصبحت غالبية المساحة داخل حدود البحيرة تقع ضمن مناطق مرتفعة الرطوبة واختفت تقريبًا معظم الجيوب منخفضة الرطوبة هذا يعكس تدخلًا إيجابيًا قد يكون ناتجًا عن استصلاح أو تحسين للظروف الهيدرولوجية في بحيرة ادكو مما أدى إلى استعادة حالة مائية أكثر استقرارً</p>
+                    <button class="details-btn" data-img="mapss\Om\lswi edco.jpg">عرض التفاصيل</button>
+                </div>
+            </div>
+            <div class="map-card" data-tooltip="المسطحات المائية 2025">
+                <img src="mapss\Om\lswi manzala2.jpg" alt="المسطحات المائية">
+                <div class="map-content">
+                    <h2>مؤشر رطوبة التربة والغطاء النباتي (LSWI) لبحيرة المنزلة</h2>
+                    <p>تشير الخرائط الخاصة ببحيرة المنزلة إلى أن التغير في توزيع الرطوبة كان واضحًا ومتسارعًا حيث كانت المناطق مرتفعة الرطوبة في عام 2013 تتركز داخل الحدود الرسمية للبحيرة بينما كانت المناطق المحيطة بها منخفضة الرطوبة ومع مرور الوقت وتحديدًا في عام 2019 ظهرت بدايات تمدد للمساحات الزرقاء مما يدل على زيادة في نسبة الرطوبة داخل البحيرة وفي أطرافها ومع حلول عام 2025 اتسعت هذه المساحات بشكل كبير وخرجت عن الحدود المعروفة للبحيرة وهو ما يشير إلى تحول بيئي كبير قد يكون نتيجة لتغيرات في منسوب المياه أو تسربات من شبكات الصرف أو تغيرات مناخية أو تدخلات بشرية</p>
+                    <button class="mohammad" data-img="mapss\Om\lswi manzala2.jpg">عرض التفاصيل</button>
+                </div>
+            </div>
+            <div class="map-card" data-tooltip="main">
+                <img src="mapss\Om\lswimaryuot.jpg" alt="النمو الحضري">
+                <div class="map-content">
+                    <h2>مؤشر رطوبة التربة والغطاء النباتي (LSWI) لبحيرة مريوط</h2>
+                    <p>تُظهر الخرائط الخاصة ببحيرة مريوط تغيرًا تدريجيًا وأقل حدة في نمط توزيع الرطوبة حيث كانت المناطق مرتفعة الرطوبة في عام 2013 محصورة تمامًا داخل حدود البحيرة في حين أن المناطق المحيطة بها كانت منخفضة الرطوبة وفي عام 2019 ظهرت بعض الامتدادات الصغيرة للمناطق الزرقاء خارج الحدود الرسمية للبحيرة وهو ما يدل على بداية تغير في طبيعة الأراضي المحيطة بها سواء بسبب تسرب مياه أو تغير في الاستخدامات المحيطة ومع حلول عام 2025 استمرت هذه التغيرات ولكن بشكل تدريجي حيث زادت نسبة الأراضي مرتفعة الرطوبة داخل البحيرة وفي أطرافها خاصة من الجهة الشرقية</p>
+                    <button class="details-btn" data-img="mapss\Om\lswimaryuot.jpg">عرض التفاصيل</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal" id="map-modal">
+        <img id="modal-image" src="" alt="خريطة كاملة">
+        <button class="close-btn"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scroll-top"><i class="fas fa-arrow-up"></i></button>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 معرض خرائط دلتا الشمال | مدعوم بواسطة xAI - <a href="contact.html">اتصل بنا</a></p>
+    </footer>
+
+    <script>
+        const translations = {
+            ar: {
+                title: "معرض خرائط دلتا الشمال",
+                logo: "خرائط دلتا الشمال",
+                home: "الرئيسية",
+                gallery: "المعرض",
+                about: "عن الموقع",
+                contact: "اتصل بنا",
+                explore: "استكشف خرائط دلتا الشمال",
+                search: "ابحث عن الخرائط بالاسم...",
+                gridView: "عرض شبكي",
+                listView: "عرض قائمة",
+                topo: "مؤشر رطوبة التربة والغطاء النباتي (LSWI) لبحيرة البرلس",
+                topoText: "كانت المناطق المحيطة بالبحيرة في عام 2013 تتسم بانتشار واسع للمناطق منخفضة الرطوبة مقارنة بالمناطق المرتفعة ومع التقدم إلى عام 2019 بدأت المناطق مرتفعة الرطوبة في التوسع داخل نطاق البحيرة والمناطق المحيطة خاصة من الجهة الجنوبية والجنوبية الغربية مما يشير إلى زيادة في النشاط المائي أو تحسن في الرطوبة نتيجة التغيرات البيئية أو تدخلات بشرية بحلول عام 2025 أصبح انتشار المناطق مرتفعة الرطوبة أكثر وضوحًا داخل حدود البحيرة وتقلصت المساحات ذات الرطوبة المنخفضة بشكل ملحوظ",
+                veg: "مؤشر رطوبة التربة والغطاء النباتي (LSWI) لبحيرة ادكو",
+                vegText: "في عام 2013 كانت بحيرة ادكو محاطة بغطاء واسع من المناطق مرتفعة الرطوبة داخل وخارج حدودها لكن لوحظ وجود جيوب من المناطق منخفضة الرطوبة خاصة داخل البحيرة نحو عام 2019 بدأت هذه الجيوب تتوسع تدريجيًا داخل حدود البحيرة مع تقلص المناطق المرتفعة الرطوبة ما يشير إلى بداية تدهور في الحالة الرطبة وزيادة في الجفاف أو تراجع في الموارد المائية بحلول عام 2025 تغير الوضع كليًا حيث أصبحت غالبية المساحة داخل حدود البحيرة تقع ضمن مناطق مرتفعة الرطوبة واختفت تقريبًا معظم الجيوب منخفضة الرطوبة هذا يعكس تدخلًا إيجابيًا قد يكون ناتجًا عن استصلاح أو تحسين للظروف الهيدرولوجية في بحيرة ادكو مما أدى إلى استعادة حالة مائية أكثر استقرارً",
+                water: "مؤشر رطوبة التربة والغطاء النباتي (LSWI) لبحيرة المنزلة",
+                waterText: "تشير الخرائط الخاصة ببحيرة المنزلة إلى أن التغير في توزيع الرطوبة كان واضحًا ومتسارعًا حيث كانت المناطق مرتفعة الرطوبة في عام 2013 تتركز داخل الحدود الرسمية للبحيرة بينما كانت المناطق المحيطة بها منخفضة الرطوبة ومع مرور الوقت وتحديدًا في عام 2019 ظهرت بدايات تمدد للمساحات الزرقاء مما يدل على زيادة في نسبة الرطوبة داخل البحيرة وفي أطرافها ومع حلول عام 2025 اتسعت هذه المساحات بشكل كبير وخرجت عن الحدود المعروفة للبحيرة وهو ما يشير إلى تحول بيئي كبير قد يكون نتيجة لتغيرات في منسوب المياه أو تسربات من شبكات الصرف أو تغيرات مناخية أو تدخلات بشرية",
+                urban: "مؤشر رطوبة التربة والغطاء النباتي (LSWI) لبحيرة مريوط",
+                urbanText: "تُظهر الخرائط الخاصة ببحيرة مريوط تغيرًا تدريجيًا وأقل حدة في نمط توزيع الرطوبة حيث كانت المناطق مرتفعة الرطوبة في عام 2013 محصورة تمامًا داخل حدود البحيرة في حين أن المناطق المحيطة بها كانت منخفضة الرطوبة وفي عام 2019 ظهرت بعض الامتدادات الصغيرة للمناطق الزرقاء خارج الحدود الرسمية للبحيرة وهو ما يدل على بداية تغير في طبيعة الأراضي المحيطة بها سواء بسبب تسرب مياه أو تغير في الاستخدامات المحيطة ومع حلول عام 2025 استمرت هذه التغيرات ولكن بشكل تدريجي حيث زادت نسبة الأراضي مرتفعة الرطوبة داخل البحيرة وفي أطرافها خاصة من الجهة الشرقية",
+                details: "عرض التفاصيل",
+                footer: "© 2025 معرض خرائط دلتا الشمال | مدعوم بواسطة xAI - "
+            },
+            en: {
+                title: "North Delta Maps Gallery",
+                logo: "North Delta Maps",
+                home: "Home",
+                gallery: "Gallery",
+                about: "About",
+                contact: "Contact",
+                explore: "Explore North Delta Maps",
+                search: "Search maps by name...",
+                gridView: "Grid View",
+                listView: "List View",
+                topo: "Land Surface Wetness Index (LSWI) for Lake Burullus",
+                topoText: "In 2013, the areas surrounding Lake Burullus were characterized by a wide spread of low-moisture areas compared to high-moisture ones. By 2019, high-moisture areas began to expand within the lake’s boundaries and surrounding regions, particularly from the southern and southwestern sides, indicating increased water activity or improved moisture due to environmental changes or human interventions. By 2025, the spread of high-moisture areas became more pronounced within the lake’s boundaries, with low-moisture areas significantly reduced.",
+                veg: "Land Surface Wetness Index (LSWI) for Lake Idku",
+                vegText: "In 2013, Lake Idku was surrounded by a wide cover of high-moisture areas both inside and outside its boundaries, but pockets of low-moisture areas were observed, especially within the lake. By 2019, these pockets gradually expanded within the lake’s boundaries, with high-moisture areas shrinking, indicating the onset of deterioration in the wet condition, increased dryness, or a decline in water resources. By 2025, the situation completely changed, with the majority of the area within the lake’s boundaries falling under high-moisture areas, and most low-moisture pockets nearly disappeared. This reflects positive intervention, possibly due to reclamation or improved hydrological conditions in Lake Idku, leading to a more stable water state.",
+                water: "Land Surface Wetness Index (LSWI) for Lake Manzala",
+                waterText: "The maps for Lake Manzala indicate that the change in moisture distribution was clear and rapid. In 2013, high-moisture areas were concentrated within the lake’s official boundaries, while surrounding areas were low in moisture. Over time, particularly in 2019, the beginnings of an expansion of blue areas appeared, indicating an increase in moisture percentage within the lake and its edges. By 2025, these areas expanded significantly, extending beyond the lake’s known boundaries, suggesting a major environmental shift possibly due to changes in water levels, leaks from drainage networks, climatic changes, or human interventions.",
+                urban: "Land Surface Wetness Index (LSWI) for Lake Mariout",
+                urbanText: "The maps for Lake Mariout show a gradual and less drastic change in the moisture distribution pattern. In 2013, high-moisture areas were entirely confined within the lake’s boundaries, while surrounding areas were low in moisture. In 2019, some small extensions of blue areas appeared outside the lake’s official boundaries, indicating the start of a change in the nature of the surrounding lands, possibly due to water seepage or changes in surrounding land use. By 2025, these changes continued gradually, with an increased proportion of high-moisture areas within the lake and its edges, particularly from the eastern side.",
+                details: "View Details",
+                footer: "© 2025 North Delta Maps Gallery | Powered by xAI - "
+            }
+        };
+
+        // Language Switcher
+        document.getElementById('language-switcher').addEventListener('change', function() {
+            const lang = this.value;
+            document.title = translations[lang].title;
+            document.querySelector('.logo').textContent = translations[lang].logo;
+            document.querySelectorAll('.nav-links a')[0].textContent = translations[lang].home;
+            document.querySelectorAll('.nav-links a')[1].textContent = translations[lang].gallery;
+            document.querySelectorAll('.nav-links a')[2].textContent = translations[lang].about;
+            document.querySelectorAll('.nav-links a')[3].textContent = translations[lang].contact;
+            document.querySelector('.maps-gallery h1').textContent = translations[lang].explore;
+            document.querySelector('#search-input').placeholder = translations[lang].search;
+            document.querySelector('#grid-view').textContent = translations[lang].gridView;
+            document.querySelector('#list-view').textContent = translations[lang].listView;
+            document.querySelectorAll('.map-content h2')[0].textContent = translations[lang].topo;
+            document.querySelectorAll('.map-content p')[0].textContent = translations[lang].topoText;
+            document.querySelectorAll('.map-content h2')[1].textContent = translations[lang].veg;
+            document.querySelectorAll('.map-content p')[1].textContent = translations[lang].vegText;
+            document.querySelectorAll('.map-content h2')[2].textContent = translations[lang].water;
+            document.querySelectorAll('.map-content p')[2].textContent = translations[lang].waterText;
+            document.querySelectorAll('.map-content h2')[3].textContent = translations[lang].urban;
+            document.querySelectorAll('.map-content p')[3].textContent = translations[lang].urbanText;
+            document.querySelectorAll('.details-btn').forEach(btn => btn.textContent = translations[lang].details);
+            document.querySelector('.footer p').innerHTML = translations[lang].footer + '<a href="contact.html">' + translations[lang].contact + '</a>';
+
+            // Update tooltips
+            document.querySelectorAll('.map-card').forEach((card, index) => {
+                const tooltips = [
+                    lang === 'ar' ? 'خريطة طوبوغرافية 2025' : 'Topographic Map 2025',
+                    lang === 'ar' ? 'خريطة الغطاء النباتي 2025' : 'Vegetation Map 2025',
+                    lang === 'ar' ? 'المسطحات المائية 2025' : 'Water Bodies 2025',
+                    lang === 'ar' ? 'النمو الحضري 2025' : 'Urban Growth 2025'
+                ];
+                card.setAttribute('data-tooltip', tooltips[index]);
+            });
+        });
+
+        // Progress Bar on Page Load and Scroll
+        window.addEventListener('load', () => {
+            document.getElementById('progress-bar').style.width = '100%';
+            setTimeout(() => {
+                document.getElementById('progress-bar').style.width = '0';
+            }, 500);
+        });
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('progress-bar').style.width = `${scrollPercent}%`;
+        });
+
+        // Smooth Scroll for Nav Links
+        document.querySelectorAll('.nav-links a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href.startsWith('#')) {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+                // External links (e.g., contact.html) will follow default navigation
+            });
+        });
+
+        // Scroll Animation for Map Cards
+        const mapCards = document.querySelectorAll('.map-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.2 });
+
+        mapCards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(card);
+        });
+
+        // View Toggle
+        const gridViewBtn = document.getElementById('grid-view');
+        const listViewBtn = document.getElementById('list-view');
+        const mapsContainer = document.querySelector('.maps-container');
+
+        gridViewBtn.addEventListener('click', () => {
+            mapsContainer.classList.remove('list-view');
+            gridViewBtn.classList.add('active');
+            listViewBtn.classList.remove('active');
+        });
+
+        listViewBtn.addEventListener('click', () => {
+            mapsContainer.classList.add('list-view');
+            listViewBtn.classList.add('active');
+            gridViewBtn.classList.remove('active');
+        });
+
+        // Modal for Full-Screen Map
+        const modal = document.getElementById('map-modal');
+        const modalImage = document.getElementById('modal-image');
+        const closeBtn = document.querySelector('.close-btn');
+        const detailsButtons = document.querySelectorAll('.details-btn');
+
+        detailsButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const imgSrc = btn.getAttribute('data-img');
+                modalImage.src = imgSrc;
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Search Functionality
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', () => {
+            const filter = searchInput.value.toLowerCase();
+            mapCards.forEach(card => {
+                const title = card.querySelector('h2').textContent.toLowerCase();
+                card.style.display = title.includes(filter) ? 'block' : 'none';
+            });
+        });
+
+        // Scroll to Top Button
+        const scrollTopBtn = document.getElementById('scroll-top');
+        window.addEventListener('scroll', () => {
+            scrollTopBtn.style.display = window.scrollY > 300 ? 'block' : 'none';
+        });
+
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

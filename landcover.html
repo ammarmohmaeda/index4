@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Land Cover using Sentinel-2</title>
+
+    <!-- ArcGIS API for JavaScript -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.30/"></script>
+
+    <!-- Custom Stylesheets -->
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="contactus.css">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* General Layout */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Styling */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 4rem;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            background: linear-gradient(135deg, #2c3e50, #4682b4);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .header .search-bar {
+            flex-grow: 1;
+            margin: 0 1rem;
+        }
+
+        .header .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Map Container */
+        #viewDiv {
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+            z-index: 1;
+        }
+
+        /* Picker Container Styling */
+        #pickerContainer {
+            position: absolute;
+            top: 4.5rem;
+            right: 1.5rem;
+            z-index: 100;
+            width: 20rem;
+            background: linear-gradient(135deg, #ffffff, #f9f9f9);
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .panel-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #valuePickerTimeDiv {
+            background: #f1f1f1;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            width: 100%; /* Full width */
+            box-sizing: border-box;
+        }
+
+        .download-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%; /* Full width */
+            box-sizing: border-box;
+        }
+
+        .download-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .warning-message {
+            color: #d32f2f;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            background: #ffebee;
+            border-radius: 0.3rem;
+            width: 100%; /* Full width */
+            box-sizing: border-box;
+        }
+
+        /* Footer Styling */
+        .footer {
+            text-align: center;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: #fff;
+            width: 100%;
+            z-index: 100;
+            font-size: 0.9rem;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer span {
+            color: #f1c40f;
+            font-weight: bold;
+        }
+
+        /* Language Switcher Styles */
+        .language-switcher {
+            margin-left: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .language-switcher:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* RTL Support for Arabic */
+        html[lang="ar"] {
+            direction: rtl;
+        }
+        
+        html[lang="ar"] .sidebar,
+        html[lang="ar"] .menu {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo" data-translate="app.title">North Delta Lakes</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search services..." data-translate="search.placeholder">
+            <button><i class="fas fa-search"></i></button>
+        </div>
+        <div class="actions">
+            <a href="loginn.html" class="btn" data-translate="auth.login">Login</a>
+            <a href="register2.html" class="btn" data-translate="auth.register">Register</a>
+            <button class="language-switcher" id="languageToggle">
+                <span data-translate="language.arabic">العربية</span>
+            </button>
+            <div class="icon" id="dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+            </div>
+            <div class="icon" id="menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" id="close-btn"><i class="fas fa-times"></i></span>
+        <div class="profile">
+            <img src="f:/preoject developer/projectall/projectteam/icon/بحيرة_إدكو.jpg" alt="Edku Lake Logo" data-translate="image.alt">
+            <h3 data-translate="sidebar.morphological">Morphological Changes</h3>
+            <p data-translate="sidebar.north_lakes">North Delta Lakes</p>
+        </div>
+        <nav class="menu">
+            <a href="index.html"><i class="fas fa-home"></i> <span data-translate="menu.home">Home</span></a>
+            <a href="index.html"><i class="fas fa-graduation-cap"></i> <span data-translate="menu.services">Services</span></a>
+            <a href="promblems.html"><i class="fas fa-headset"></i> <span data-translate="menu.contact">Contact Us</span></a>
+        </nav>
+    </div>
+
+    <!-- Map Container -->
+    <div id="viewDiv"></div>
+
+    <!-- Picker Container (Years and Download Button) -->
+    <div id="pickerContainer">
+        <div class="panel-content">
+            <div id="valuePickerTimeDiv"></div>
+            <button id="downloadButton" class="download-button">
+                <i class="fas fa-download"></i> <span data-translate="buttons.download">Download Map as Image</span>
+            </button>
+            <div id="warningMessage" class="warning-message"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <span data-translate="footer.copyright">© Copyright 2024 by</span> <span>Ammar Mohamed Abdullah</span> | <span data-translate="footer.rights">All rights reserved!</span>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Translation dictionary
+        const translations = {
+            en: {
+                "app.title": "North Delta Lakes",
+                "search.placeholder": "Search services...",
+                "auth.login": "Login",
+                "auth.register": "Register",
+                "language.arabic": "العربية",
+                "sidebar.morphological": "Morphological Changes",
+                "sidebar.north_lakes": "North Delta Lakes",
+                "menu.home": "Home",
+                "menu.screenshots": "Screenshots",
+                "menu.services": "Services",
+                "menu.contact": "Contact Us",
+                "buttons.download": "Download Map as Image",
+                "footer.copyright": "© Copyright 2024 by",
+                "footer.rights": "All rights reserved!",
+                "picker.year": "Land Cover in",
+                "image.alt": "Edku Lake Logo"
+            },
+            ar: {
+                "app.title": "البحيرات الشماليه للدلتا ",
+                "search.placeholder": "ابحث عن الخدمات...",
+                "auth.login": "تسجيل الدخول",
+                "auth.register": "إنشاء حساب",
+                "language.arabic": "English",
+                "sidebar.morphological": "التغيرات المورفولوجية",
+                "sidebar.north_lakes": "بحيرات شمال الدلتا",
+                "menu.home": "الرئيسية",
+                "menu.screenshots": "لقطات الشاشة",
+                "menu.services": "الخدمات",
+                "menu.contact": "تواصل معنا",
+                "buttons.download": "تحميل الخريطة كصورة",
+                "footer.copyright": "© حقوق الطبع والنشر 2024 بواسطة",
+                "footer.rights": "جميع الحقوق محفوظة!",
+                "picker.year": "غطاء الأرض في",
+                "image.alt": "شعار بحيرة إدكو"
+            }
+        };
+
+        // Function to change language
+        function changeLanguage(lang) {
+            // Update html lang attribute
+            document.documentElement.lang = lang;
+            
+            // Update direction based on language
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // Update all elements with data-translate attribute
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang][key]) {
+                    // For input placeholders
+                    if (element.tagName === 'INPUT' && element.getAttribute('placeholder')) {
+                        element.setAttribute('placeholder', translations[lang][key]);
+                    } 
+                    // For other elements
+                    else {
+                        element.textContent = translations[lang][key];
+                    }
+                }
+            });
+            
+            // Update dynamic elements like ValuePicker
+            updatePickerLabels(lang);
+        }
+
+        // Function to update ValuePicker labels
+        function updatePickerLabels(lang) {
+            const pickerDiv = document.getElementById('valuePickerTimeDiv');
+            if (pickerDiv) {
+                const valuePicker = pickerDiv.querySelector('.esri-value-picker');
+                if (valuePicker) {
+                    const items = valuePicker.querySelectorAll('.esri-value-picker__item');
+                    items.forEach((item, index) => {
+                        const year = 2017 + index;
+                        item.textContent = translations[lang]['picker.year'] + ' ' + year;
+                    });
+                }
+            }
+        }
+
+        // Language toggle functionality
+        document.getElementById('languageToggle').addEventListener('click', function() {
+            const currentLang = document.documentElement.lang;
+            const newLang = currentLang === 'en' ? 'ar' : 'en';
+            changeLanguage(newLang);
+            
+            // Save preference to localStorage
+            localStorage.setItem('preferredLanguage', newLang);
+        });
+
+        // Initialize with preferred language or default to English
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            changeLanguage(savedLang);
+        });
+
+        // ArcGIS Map Implementation
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/ImageryLayer",
+            "esri/widgets/ValuePicker",
+            "esri/widgets/Legend",
+            "esri/widgets/Expand",
+            "esri/core/reactiveUtils"
+        ], (Map, MapView, ImageryLayer, ValuePicker, Legend, Expand, reactiveUtils) =>
+            (async () => {
+                const layer = new ImageryLayer({
+                    url: "https://ic.imagery1.arcgis.com/arcgis/rest/services/Sentinel2_10m_LandCover/ImageServer",
+                    effect: "brightness(110%) drop-shadow(2px, 2px, 3px, #000)",
+                    blendMode: "multiply"
+                });
+
+                const map = new Map({
+                    basemap: "satellite",
+                    layers: [layer]
+                });
+
+                const view = new MapView({
+                    container: "viewDiv",
+                    map,
+                    zoom: 6,
+                    center: [30.5, 27.8]
+                });
+
+                await view.when();
+
+                const startDate = new Date(2017, 0, 1);
+                const endDate = new Date(2025, 0, 1);
+                let currentDate = startDate;
+
+                const labelComponentForDates = [];
+                while (currentDate <= endDate) {
+                    const currentLang = document.documentElement.lang || 'en';
+                    const yearLabel = translations[currentLang]['picker.year'] + ' ' + currentDate.getFullYear();
+                    
+                    labelComponentForDates.push({
+                        value: currentDate.getTime(),
+                        label: yearLabel
+                    });
+                    currentDate.setFullYear(currentDate.getFullYear() + 1);
+                }
+
+                const valuePickerTime = new ValuePicker({
+                    values: [labelComponentForDates[0].value],
+                    component: {
+                        type: "label",
+                        items: labelComponentForDates
+                    },
+                    playRate: 1500,
+                    loop: true,
+                    container: "valuePickerTimeDiv"
+                });
+
+                reactiveUtils.watch(
+                    () => valuePickerTime.values,
+                    (values) => {
+                        const startDate = new Date(values[0]);
+                        const endDate = new Date(startDate);
+                        endDate.setFullYear(startDate.getFullYear() + 1);
+                        view.timeExtent = {
+                            start: new Date(values[0]),
+                            end: endDate
+                        };
+
+                        const selectedYear = startDate.getFullYear();
+                        const currentLang = document.documentElement.lang || 'en';
+                        document.getElementById("warningMessage").innerText = 
+                            (selectedYear < 2017 || selectedYear > 2025) 
+                            ? "⚠️ " + (currentLang === 'ar' ? 
+                                "البيانات غير متوفرة لسنة " + selectedYear : 
+                                "Data not available for year " + selectedYear)
+                            : "";
+                    }
+                );
+
+                document.getElementById("downloadButton").addEventListener("click", () => {
+                    view.takeScreenshot().then((screenshot) => {
+                        const link = document.createElement("a");
+                        link.href = screenshot.dataUrl;
+                        link.download = `LandCover_${new Date().toISOString()}.png`;
+                        link.click();
+                    });
+                });
+
+                const legendExpand = new Expand({
+                    expandTooltip: document.documentElement.lang === 'ar' ? "عرض الوسيط" : "Show Legend",
+                    expanded: false,
+                    view: view,
+                    content: new Legend({ view })
+                });
+                view.ui.add(legendExpand, "top-left");
+            })());
+    </script>
+    <script src="index.js"></script>
+</body>
+</html>

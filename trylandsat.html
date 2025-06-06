@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Landsat Imagery Viewer (Monthly Data)</title>
+
+   <!-- Font Awesome -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+
+   <!-- ArcGIS API for JavaScript -->
+   <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+   <script src="https://js.arcgis.com/4.30/"></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+   <!-- ربط ملف CSS -->
+   <link rel="stylesheet" href="contactus.css">
+   <!-- Calcite Components -->
+   <script type="module" src="https://js.arcgis.com/calcite-components/2.11.1/calcite.esm.js"></script>
+   <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.11.1/calcite.css" />
+
+   <style>
+      html, body, #viewDiv {
+         padding: 0;
+         margin: 0;
+         height: 100%;
+         width: 100%;
+      }
+
+      .panel-content {
+         padding: 12px;
+         display: flex;
+         flex-direction: column;
+         gap: 12px;
+         background: #f9f9f9;
+         border-radius: 8px;
+         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .footer {
+         text-align: center;
+         padding: 10px;
+         background-color: #f1f1f1;
+         position: fixed;
+         bottom: 0;
+         width: 100%;
+      }
+
+      .warning-message {
+         color: #d32f2f;
+         font-weight: bold;
+         text-align: center;
+         margin-top: 10px;
+      }
+
+      .download-button, .csv-button {
+         background-color: #4CAF50;
+         color: white;
+         padding: 10px;
+         border: none;
+         cursor: pointer;
+         text-align: center;
+         border-radius: 5px;
+         margin-top: 5px;
+      }
+
+      .download-button:hover, .csv-button:hover {
+         background-color: #45a049;
+      }
+
+      .dropdown, .slider, .search-input {
+         padding: 8px;
+         border-radius: 5px;
+         border: 1px solid #ccc;
+         width: 100%;
+      }
+
+      .coordinates {
+         font-size: 12px;
+         color: #555;
+         text-align: center;
+         margin-top: 10px;
+      }
+   </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">North Delta Lakes</div>
+    <div class="search-bar">
+       <input type="text" placeholder="Search services...">
+       <button><i class="fas fa-search"></i></button>
+    </div>
+    <div class="actions">
+       <a href="loginn.html" class="btn">Login</a>
+       <a href="register2.html" class="btn">Register</a>
+       <div class="icon" id="dark-mode-toggle">
+          <i class="fas fa-moon"></i>
+       </div>
+       <div class="icon" id="menu-btn">
+          <i class="fas fa-bars"></i>
+       </div>
+    </div>
+  </header>
+  
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <span class="close-btn" id="close-btn"><i class="fas fa-times"></i></span>
+    <div class="profile">
+       <img src="f:\preoject developer\projectall\projectteam\icon\بحيرة_إدكو.jpg" alt="Minya Governorate Logo">
+       <h3>morphological change</h3>
+       <p>North Delta Lakes</p>
+    </div>
+    <nav class="menu">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="index.html"><i class="fas fa-graduation-cap"></i> Services</a>
+      <a href="promblems.html"><i class="fas fa-headset"></i> Contact Us</a>
+    </nav>
+  </div>
+
+  <div id="viewDiv"></div>
+
+  <calcite-panel id="pickerContainer" heading="Landsat Imagery (2000-2025 Monthly)">
+     <div class="panel-content">
+        <div id="valuePickerTimeDiv"></div>
+        <label for="yearDropdown"><i class="fas fa-calendar-alt"></i> Select Year:</label>
+        <select id="yearDropdown" class="dropdown"></select>
+        <label for="bandDropdown"><i class="fas fa-layer-group"></i> Select Band:</label>
+        <select id="bandDropdown" class="dropdown">
+           <option value="Natural Color">Natural Color (Bands 4, 3, 2)</option>
+           <option value="Color Infrared">Color Infrared (Bands 5, 4, 3)</option>
+           <option value="Shortwave Infrared">Shortwave Infrared (Bands 6, 5, 4)</option>
+           <option value="Band 1">Band 1 (Coastal Aerosol)</option>
+           <option value="Band 2">Band 2 (Blue)</option>
+           <option value="Band 3">Band 3 (Green)</option>
+           <option value="Band 4">Band 4 (Red)</option>
+           <option value="Band 5">Band 5 (Near Infrared)</option>
+           <option value="Band 6">Band 6 (Shortwave Infrared 1)</option>
+           <option value="Band 7">Band 7 (Shortwave Infrared 2)</option>
+           <option value="Band 8">Band 8 (Panchromatic)</option>
+           <option value="Band 9">Band 9 (Cirrus)</option>
+           <option value="Band 10">Band 10 (Thermal Infrared 1)</option>
+           <option value="Band 11">Band 11 (Thermal Infrared 2)</option>
+        </select>
+        <label for="transparencySlider"><i class="fas fa-eye"></i> Transparency:</label>
+        <input type="range" id="transparencySlider" class="slider" min="0" max="1" step="0.1" value="1">
+        <label for="searchInput"><i class="fas fa-search"></i> Search Location:</label>
+        <input type="text" id="searchInput" class="search-input" placeholder="Enter place or coordinates">
+        <button id="downloadButton" class="download-button">Download Map with Drawings</button>
+        <button id="exportCsvButton" class="csv-button">Export Data as CSV</button>
+        <div id="measurementDisplay" class="coordinates">Measurements: None</div>
+        <div id="warningMessage" class="warning-message"></div>
+        <div id="coordinatesDisplay" class="coordinates"></div>
+     </div>
+  </calcite-panel>
+
+  <footer class="footer">
+     © Copyright @ 2024 by <span>Ammar Mohamed Abdallah</span> | All rights reserved!
+  </footer>
+
+  <script>
+     require([
+         "esri/Map",
+         "esri/views/MapView",
+         "esri/layers/ImageryLayer",
+         "esri/widgets/ValuePicker",
+         "esri/widgets/Legend",
+         "esri/widgets/Expand",
+         "esri/core/reactiveUtils",
+         "esri/layers/GraphicsLayer",
+         "esri/widgets/Sketch",
+         "esri/rest/locator",
+         "esri/geometry/geometryEngine"
+     ], (Map, MapView, ImageryLayer, ValuePicker, Legend, Expand, reactiveUtils, GraphicsLayer, Sketch, locator, geometryEngine) =>
+         (async () => {
+             const layer = new ImageryLayer({
+                 url: "https://landsat2.arcgis.com/arcgis/rest/services/Landsat/MS/ImageServer",
+                 effect: "brightness(110%) drop-shadow(2px, 2px, 3px, #000)",
+                 blendMode: "multiply"
+             });
+
+             const graphicsLayer = new GraphicsLayer();
+
+             const map = new Map({
+                 basemap: "satellite",
+                 layers: [layer, graphicsLayer]
+             });
+
+             const view = new MapView({
+                 container: "viewDiv",
+                 map,
+                 zoom: 10,
+                 center: [30.9, 31.2]
+             });
+
+             await view.whenLayerView(layer);
+
+             // تعيين التواريخ الشهرية من 2000 إلى 2025
+             const startYear = 2000;
+             const endYear = 2025;
+             const months = [
+                 "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+             ];
+             const labelComponentForDates = [];
+
+             for (let year = startYear; year <= endYear; year++) {
+                 for (let month = 0; month < 12; month++) {
+                     const date = new Date(year, month, 1);
+                     labelComponentForDates.push({
+                         value: date.getTime(),
+                         label: `${months[month]} ${year}`
+                     });
+                 }
+             }
+
+             const valuePickerTime = new ValuePicker({
+                 values: [labelComponentForDates[0].value],
+                 component: {
+                     type: "label",
+                     items: labelComponentForDates
+                 },
+                 playRate: 1000,
+                 loop: true,
+                 container: "valuePickerTimeDiv"
+             });
+
+             // إضافة قائمة منسدلة للسنوات
+             const yearDropdown = document.getElementById("yearDropdown");
+             for (let year = startYear; year <= endYear; year++) {
+                 const option = document.createElement("option");
+                 option.value = year;
+                 option.text = year;
+                 yearDropdown.appendChild(option);
+             }
+             yearDropdown.addEventListener("change", (event) => {
+                 const selectedYear = parseInt(event.target.value);
+                 const selectedDate = new Date(selectedYear, 0, 1).getTime();
+                 valuePickerTime.values = [selectedDate];
+             });
+
+             reactiveUtils.watch(
+                 () => valuePickerTime.values,
+                 (values) => {
+                     const startDate = new Date(values[0]);
+                     const endDate = new Date(startDate);
+                     endDate.setMonth(startDate.getMonth() + 1);
+
+                     view.timeExtent = {
+                         start: startDate,
+                         end: endDate
+                     };
+
+                     const selectedYear = startDate.getFullYear();
+                     const selectedMonth = startDate.getMonth();
+                     layer.when(() => {
+                         layer.queryRasterInfos({
+                             timeExtent: view.timeExtent
+                         }).then((result) => {
+                             if (!result || result.features.length === 0) {
+                                 document.getElementById("warningMessage").innerText = 
+                                     `⚠️ No data available for ${months[selectedMonth]} ${selectedYear}`;
+                             } else {
+                                 document.getElementById("warningMessage").innerText = "";
+                             }
+                         });
+                     });
+                 }
+             );
+
+             // إضافة أداة الرسم
+             const sketch = new Sketch({
+                 layer: graphicsLayer,
+                 view: view,
+                 availableCreateTools: ["point", "polyline", "polygon", "rectangle", "circle"]
+             });
+             view.ui.add(sketch, "top-right");
+
+             // دالة لحساب القياسات وتحديث العرض
+             function updateMeasurements() {
+                 let totalArea = 0;
+                 let totalLength = 0;
+                 let hasGraphics = false;
+
+                 graphicsLayer.graphics.forEach((graphic) => {
+                     const geometryType = graphic.geometry.type;
+                     hasGraphics = true;
+
+                     if (geometryType === "polygon") {
+                         // حساب المساحة بالهكتار
+                         const area = geometryEngine.planarArea(graphic.geometry, "square-meters") / 10000;
+                         totalArea += area;
+                         // حساب محيط المضلع بالمتر
+                         const length = geometryEngine.planarLength(graphic.geometry, "meters");
+                         totalLength += length;
+                     } else if (geometryType === "polyline") {
+                         // حساب طول الخط بالمتر
+                         const length = geometryEngine.planarLength(graphic.geometry, "meters");
+                         totalLength += length;
+                     } else if (geometryType === "point") {
+                         // لا مساحة أو طول للنقاط
+                     }
+                 });
+
+                 const measurementDisplay = document.getElementById("measurementDisplay");
+                 if (!hasGraphics) {
+                     measurementDisplay.innerText = "Measurements: None";
+                 } else if (totalArea > 0 && totalLength > 0) {
+                     measurementDisplay.innerText = `Area: ${totalArea.toFixed(2)} hectares, Perimeter/Length: ${totalLength.toFixed(2)} meters`;
+                 } else if (totalLength > 0) {
+                     measurementDisplay.innerText = `Length: ${totalLength.toFixed(2)} meters`;
+                 } else {
+                     measurementDisplay.innerText = "Measurements: No area or length (points only)";
+                 }
+             }
+
+             // حساب القياسات عند إنشاء أو تحديث الرسومات
+             sketch.on(["create", "update"], (event) => {
+                 if (event.state === "complete" || event.state === "active") {
+                     updateMeasurements();
+                 }
+             });
+
+             // إعادة تعيين القياسات عند حذف الرسومات
+             sketch.on("delete", () => {
+                 updateMeasurements();
+             });
+
+             // تحميل الخريطة مع الرسومات
+             document.getElementById("downloadButton").addEventListener("click", () => {
+                 view.takeScreenshot({ layers: [layer, graphicsLayer] }).then((screenshot) => {
+                     const link = document.createElement("a");
+                     link.href = screenshot.dataUrl;
+                     link.download = `LandsatImagery_${new Date().toISOString()}.png`;
+                     link.click();
+                 });
+             });
+
+             // إضافة اختيار النطاقات
+             const bandDropdown = document.getElementById("bandDropdown");
+             bandDropdown.addEventListener("change", (event) => {
+                 const selectedBand = event.target.value;
+                 switch (selectedBand) {
+                     case "Natural Color":
+                         layer.rasterFunction = { functionName: "Natural Color with DRA", arguments: { BandIds: [4, 3, 2] } };
+                         break;
+                     case "Color Infrared":
+                         layer.rasterFunction = { functionName: "Color Infrared with DRA", arguments: { BandIds: [5, 4, 3] } };
+                         break;
+                     case "Shortwave Infrared":
+                         layer.rasterFunction = { functionName: "Shortwave Infrared with DRA", arguments: { BandIds: [6, 5, 4] } };
+                         break;
+                     case "Band 1": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [1] } }; break;
+                     case "Band 2": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [2] } }; break;
+                     case "Band 3": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [3] } }; break;
+                     case "Band 4": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [4] } }; break;
+                     case "Band 5": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [5] } }; break;
+                     case "Band 6": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [6] } }; break;
+                     case "Band 7": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [7] } }; break;
+                     case "Band 8": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [8] } }; break;
+                     case "Band 9": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [9] } }; break;
+                     case "Band 10": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [10] } }; break;
+                     case "Band 11": layer.rasterFunction = { functionName: "Stretch", arguments: { BandIds: [11] } }; break;
+                     default: layer.rasterFunction = null;
+                 }
+             });
+
+             // التحكم في الشفافية
+             const transparencySlider = document.getElementById("transparencySlider");
+             transparencySlider.addEventListener("input", (event) => {
+                 layer.opacity = parseFloat(event.target.value);
+             });
+
+             // إضافة البحث عن الموقع
+             const searchInput = document.getElementById("searchInput");
+             const locatorUrl = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+             searchInput.addEventListener("keypress", (event) => {
+                 if (event.key === "Enter") {
+                     locator.geocode({ searchText: searchInput.value }, { outFields: ["*"] }, locatorUrl)
+                         .then((result) => {
+                             if (result.candidates.length > 0) {
+                                 const location = result.candidates[0].location;
+                                 view.goTo({ center: [location.x, location.y], zoom: 12 });
+                             } else {
+                                 alert("Location not found!");
+                             }
+                         });
+                 }
+             });
+
+             // إظهار الإحداثيات عند النقر
+             view.on("click", (event) => {
+                 const coords = view.toMap(event);
+                 document.getElementById("coordinatesDisplay").innerText = 
+                     `Lat: ${coords.latitude.toFixed(4)}, Lon: ${coords.longitude.toFixed(4)}`;
+             });
+
+             // تصدير البيانات كـ CSV
+             document.getElementById("exportCsvButton").addEventListener("click", () => {
+                 const selectedDate = new Date(valuePickerTime.values[0]);
+                 const selectedBand = bandDropdown.value;
+                 const csvContent = `data:text/csv;charset=utf-8,Date,Selected Band\n${selectedDate.toISOString()},${selectedBand}`;
+                 const link = document.createElement("a");
+                 link.setAttribute("href", encodeURI(csvContent));
+                 link.setAttribute("download", `LandsatData_${new Date().toISOString()}.csv`);
+                 link.click();
+             });
+
+             view.ui.add(pickerContainer, "top-right");
+
+             const legendExpand = new Expand({
+                 expandTooltip: "Show Legend",
+                 expanded: false,
+                 view: view,
+                 content: new Legend({ view })
+             });
+             view.ui.add(legendExpand, "top-left");
+         })());
+  </script>
+  <script src="index.js"></script>
+</body>
+</html>

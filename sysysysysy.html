@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الرصد المتكامل للبحيرات الشمالية 2013-2035</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a5276;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --warning-color: #f39c12;
+            --success-color: #27ae60;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--success-color), var(--warning-color), var(--accent-color));
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 25px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid var(--secondary-color);
+        }
+        
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .panel h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel h2 i {
+            margin-left: 10px;
+            color: var(--secondary-color);
+        }
+        
+        #map {
+            height: 550px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+        }
+        
+        .timeline-container {
+            background: var(--light-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .timeline-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .timeline-control input, .timeline-control select {
+            flex-grow: 1;
+            height: 10px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .timeline-control input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background-color: #2472a4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        button i {
+            font-size: 1.1em;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        
+        .chart-container {
+            height: 350px;
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .lake-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: var(--light-color);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+            transition: transform 0.3s;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .info-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .comparison-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .ai-analysis {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .prediction-result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .recommendations {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 5px;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .data-table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--secondary-color);
+            color: white;
+            font-weight: bold;
+        }
+        
+        td {
+            background-color: var(--light-color);
+        }
+        
+        tr:hover td {
+            background-color: #e6f0fa;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--dark-color);
+            color: white;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-water"></i> نظام الرصد المتكامل للبحيرات الشمالية للدلتا</h1>
+        <p>تحليل التغيرات المورفولوجية والزراعية (2013-2035)</p>
+    </header>
+    
+    <div class="container">
+        <div class="panel">
+            <h2><i class="fas fa-map-marked-alt"></i> الخريطة التفاعلية للبحيرات</h2>
+            <div id="map"></div>
+            <div class="timeline-container">
+                <div class="timeline-control">
+                    <label>السنة:</label>
+                    <input type="range" id="year-slider" min="2013" max="2035" value="2035" step="1">
+                    <span id="year-display">2035</span>
+                    <button id="animate-btn"><i class="fas fa-play"></i> عرض متحرك</button>
+                    <button id="3d-view-btn"><i class="fas fa-cube"></i> عرض ثلاثي الأبعاد</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="panel">
+                <h2><i class="fas fa-chart-line"></i> تحليل التغيرات المورفولوجية</h2>
+                <div class="chart-container" id="area-chart"></div>
+                <div class="ai-analysis">
+                    <h3><i class="fas fa-robot"></i> تحليل الذكاء الاصطناعي</h3>
+                    <p>تحليل التغيرات وتوقعات المستقبل باستخدام التعلم الآلي:</p>
+                    <button id="predict-btn"><i class="fas fa-chart-bar"></i> تنبؤ بحلول 2035</button>
+                    <div id="prediction-result" class="prediction-result" style="display: none;">
+                        <h4>نتائج التنبؤ:</h4>
+                        <div id="prediction-text"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2><i class="fas fa-info-circle"></i> معلومات البحيرات</h2>
+                <div class="lake-info" id="lake-info"></div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2><i class="fas fa-tractor"></i> تحليل الإنتاج الزراعي والأسماك</h2>
+            <div class="timeline-control">
+                <label>اختر النوع:</label>
+                <select id="data-selector">
+                    <option value="fish_production">إنتاج الأسماك</option>
+                    <option value="fish_value">قيمة إنتاج الأسماك</option>
+                    <option value="farm_production">إنتاج الأسماك من المزارع</option>
+                    <option value="farms_area">مساحة المزارع</option>
+                    <option value="boats">عدد المراكب</option>
+                    <option value="fishermen">عدد الصيادين</option>
+                    <option value="wheat_area">مساحة القمح</option>
+                    <option value="wheat_production">إنتاج القمح</option>
+                    <option value="cotton_area">مساحة القطن</option>
+                    <option value="cotton_fiber_production">إنتاج القطن (ألياف)</option>
+                    <option value="cotton_seed_production">إنتاج القطن (بذرة)</option>
+                    <option value="sugarcane_area">مساحة قصب السكر</option>
+                    <option value="sugarcane_production">إنتاج قصب السكر</option>
+                    <option value="rice_area">مساحة الأرز</option>
+                    <option value="rice_production">إنتاج الأرز</option>
+                    <option value="cropped_area">المساحة المحصولية</option>
+                </select>
+            </div>
+            <div class="chart-container" id="agriculture-chart"></div>
+            <div class="ai-analysis">
+                <h3><i class="fas fa-seedling"></i> تحليل الذكاء الاصطناعي للإنتاج الزراعي والأسماك</h3>
+                <p>تقييم تأثير التغيرات على المحاصيل الزراعية والأسماك:</p>
+                <button id="agri-predict-btn"><i class="fas fa-leaf"></i> تنبؤ بالإنتاج 2035</button>
+                <div id="agri-prediction-result" class="prediction-result" style="display: none;">
+                    <h4>نتائج التنبؤ:</h4>
+                    <div id="agri-prediction-text"></div>
+                    <div id="recommendations" class="recommendations"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2><i class="fas fa-table"></i> بيانات تفصيلية للبحيرات</h2>
+            <div class="timeline-control">
+                <label>اختر البحيرة:</label>
+                <select id="lake-selector">
+                    <option value="المنزلة">المنزلة</option>
+                    <option value="البرلس">البرلس</option>
+                    <option value="مريوط">مريوط</option>
+                    <option value="إدكو">إدكو</option>
+                </select>
+            </div>
+            <div class="data-table-container">
+                <table id="data-table">
+                    <thead>
+                        <tr id="table-header"></tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2><i class="fas fa-balance-scale"></i> مقارنة شاملة</h2>
+            <div class="comparison-grid" id="comparison-grid"></div>
+        </div>
+        
+        <div class="panel">
+            <h2><i class="fas fa-cloud-sun"></i> محاكاة السيناريوهات</h2>
+            <div class="timeline-control">
+                <label>اختر السيناريو:</label>
+                <select id="scenario-selector">
+                    <option value="optimistic">متفائل</option>
+                    <option value="pessimistic">متشائم</option>
+                    <option value="moderate">معتدل</option>
+                </select>
+                <button id="simulate-btn"><i class="fas fa-play-circle"></i> تشغيل المحاكاة</button>
+            </div>
+            <div class="chart-container" id="scenario-chart"></div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>نظام رصد التغيرات المورفولوجية والزراعية © 2035 | تحليل التغيرات المورفولوجية والزراعية (2013-2035)</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // بيانات البحيرات
+        const lakesData = {
+            "المنزلة": {
+                position: [31.3333, 31.9167],
+                area: { 2013: 680, 2016: 630, 2019: 568, 2021: 594, 2023: 602, 2025: 602, 2030: 580, 2035: 550 },
+                salinity: { 2013: 2.5, 2016: 2.7, 2019: 3.0, 2021: 3.2, 2023: 3.4, 2025: 3.6, 2030: 4.0, 2035: 4.5 },
+                depth: { 2013: 1.2, 2016: 1.1, 2019: 1.0, 2021: 0.9, 2023: 0.9, 2025: 0.8, 2030: 0.7, 2035: 0.6 },
+                agriFishStats: {
+                    2013: {
+                        fish_production: 81365,
+                        fish_percentage_north: 56.16,
+                        fish_value: 1090250,
+                        farm_production: 151159,
+                        farms_count: 3,
+                        farms_area: 118708,
+                        boats: 1581,
+                        fishermen: 305,
+                        wheat_area: 334176,
+                        wheat_production: 944952,
+                        cotton_area: 59122,
+                        cotton_fiber_production: 43715,
+                        cotton_seed_production: 23388,
+                        sugarcane_area: 175,
+                        sugarcane_production: 6506,
+                        rice_area: 492564,
+                        rice_production: 2062612,
+                        cropped_area: 1588730,
+                        cultivated_area: 803697,
+                        winter_crops_area: 733958,
+                        winter_crops_production: 8979462,
+                        summer_crops_area: 681470,
+                        summer_crops_production: 2693084,
+                        winter_vegetables_area: 48667,
+                        winter_vegetables_production: 436373,
+                        summer_vegetables_area: 74875,
+                        summer_vegetables_production: 237122
+                    },
+                    2016: {
+                        fish_production: 78000,
+                        fish_percentage_north: 55,
+                        fish_value: 1050000,
+                        farm_production: 145000,
+                        farms_count: 3,
+                        farms_area: 115000,
+                        boats: 1550,
+                        fishermen: 300,
+                        wheat_area: 330000,
+                        wheat_production: 920000,
+                        cotton_area: 58000,
+                        cotton_fiber_production: 42000,
+                        cotton_seed_production: 22500,
+                        sugarcane_area: 170,
+                        sugarcane_production: 6300,
+                        rice_area: 485000,
+                        rice_production: 2000000,
+                        cropped_area: 1550000,
+                        cultivated_area: 790000,
+                        winter_crops_area: 720000,
+                        winter_crops_production: 8800000,
+                        summer_crops_area: 670000,
+                        summer_crops_production: 2600000,
+                        winter_vegetables_area: 48000,
+                        winter_vegetables_production: 420000,
+                        summer_vegetables_area: 74000,
+                        summer_vegetables_production: 230000
+                    },
+                    2019: {
+                        fish_production: 75000,
+                        fish_percentage_north: 54,
+                        fish_value: 1000000,
+                        farm_production: 140000,
+                        farms_count: 3,
+                        farms_area: 110000,
+                        boats: 1520,
+                        fishermen: 295,
+                        wheat_area: 325000,
+                        wheat_production: 900000,
+                        cotton_area: 57000,
+                        cotton_fiber_production: 41000,
+                        cotton_seed_production: 22000,
+                        sugarcane_area: 165,
+                        sugarcane_production: 6100,
+                        rice_area: 480000,
+                        rice_production: 1950000,
+                        cropped_area: 1500000,
+                        cultivated_area: 780000,
+                        winter_crops_area: 710000,
+                        winter_crops_production: 8600000,
+                        summer_crops_area: 660000,
+                        summer_crops_production: 2550000,
+                        winter_vegetables_area: 47000,
+                        winter_vegetables_production: 410000,
+                        summer_vegetables_area: 73000,
+                        summer_vegetables_production: 225000
+                    },
+                    2022: {
+                        fish_production: 72000,
+                        fish_percentage_north: 53,
+                        fish_value: 950000,
+                        farm_production: 135000,
+                        farms_count: 3,
+                        farms_area: 105000,
+                        boats: 1500,
+                        fishermen: 290,
+                        wheat_area: 320000,
+                        wheat_production: 880000,
+                        cotton_area: 56000,
+                        cotton_fiber_production: 40000,
+                        cotton_seed_production: 21500,
+                        sugarcane_area: 160,
+                        sugarcane_production: 5900,
+                        rice_area: 475000,
+                        rice_production: 1900000,
+                        cropped_area: 1450000,
+                        cultivated_area: 770000,
+                        winter_crops_area: 700000,
+                        winter_crops_production: 8400000,
+                        summer_crops_area: 650000,
+                        summer_crops_production: 2500000,
+                        winter_vegetables_area: 46000,
+                        winter_vegetables_production: 400000,
+                        summer_vegetables_area: 72000,
+                        summer_vegetables_production: 220000
+                    }
+                }
+            },
+            "البرلس": {
+                position: [31.5167, 30.8667],
+                area: { 2013: 403, 2016: 427, 2019: 427, 2021: 415, 2023: 409, 2025: 409, 2030: 400, 2035: 390 },
+                salinity: { 2013: 2.8, 2016: 3.0, 2019: 3.2, 2021: 3.4, 2023: 3.5, 2025: 3.7, 2030: 4.0, 2035: 4.2 },
+                depth: { 2013: 1.5, 2016: 1.4, 2019: 1.3, 2021: 1.2, 2023: 1.2, 2025: 1.1, 2030: 1.0, 2035: 0.9 },
+                agriFishStats: {
+                    2013: {
+                        fish_production: 72000,
+                        fish_percentage_north: 40,
+                        fish_value: 900000,
+                        farm_production: 130000,
+                        farms_count: 2,
+                        farms_area: 90000,
+                        boats: 1200,
+                        fishermen: 250,
+                        wheat_area: 300000,
+                        wheat_production: 870000,
+                        cotton_area: 50000,
+                        cotton_fiber_production: 35000,
+                        cotton_seed_production: 20000,
+                        sugarcane_area: 150,
+                        sugarcane_production: 5500,
+                        rice_area: 450000,
+                        rice_production: 1800000,
+                        cropped_area: 1200000,
+                        cultivated_area: 700000,
+                        winter_crops_area: 650000,
+                        winter_crops_production: 7500000,
+                        summer_crops_area: 600000,
+                        summer_crops_production: 2200000,
+                        winter_vegetables_area: 40000,
+                        winter_vegetables_production: 380000,
+                        summer_vegetables_area: 60000,
+                        summer_vegetables_production: 200000
+                    },
+                    2016: {
+                        fish_production: 70000,
+                        fish_percentage_north: 40,
+                        fish_value: 900000,
+                        farm_production: 130000,
+                        farms_count: 2,
+                        farms_area: 90000,
+                        boats: 1200,
+                        fishermen: 250,
+                        wheat_area: 300000,
+                        wheat_production: 850000,
+                        cotton_area: 50000,
+                        cotton_fiber_production: 35000,
+                        cotton_seed_production: 20000,
+                        sugarcane_area: 150,
+                        sugarcane_production: 5500,
+                        rice_area: 450000,
+                        rice_production: 1800000,
+                        cropped_area: 1200000,
+                        cultivated_area: 700000,
+                        winter_crops_area: 650000,
+                        winter_crops_production: 7500000,
+                        summer_crops_area: 600000,
+                        summer_crops_production: 2200000,
+                        winter_vegetables_area: 40000,
+                        winter_vegetables_production: 380000,
+                        summer_vegetables_area: 60000,
+                        summer_vegetables_production: 200000
+                    },
+                    2019: {
+                        fish_production: 68000,
+                        fish_percentage_north: 38,
+                        fish_value: 880000,
+                        farm_production: 125000,
+                        farms_count: 2,
+                        farms_area: 85000,
+                        boats: 1150,
+                        fishermen: 240,
+                        wheat_area: 290000,
+                        wheat_production: 830000,
+                        cotton_area: 48000,
+                        cotton_fiber_production: 33000,
+                        cotton_seed_production: 19000,
+                        sugarcane_area: 140,
+                        sugarcane_production: 5200,
+                        rice_area: 430000,
+                        rice_production: 1700000,
+                        cropped_area: 1150000,
+                        cultivated_area: 680000,
+                        winter_crops_area: 620000,
+                        winter_crops_production: 7200000,
+                        summer_crops_area: 580000,
+                        summer_crops_production: 2100000,
+                        winter_vegetables_area: 38000,
+                        winter_vegetables_production: 360000,
+                        summer_vegetables_area: 58000,
+                        summer_vegetables_production: 190000
+                    },
+                    2022: {
+                        fish_production: 66000,
+                        fish_percentage_north: 36,
+                        fish_value: 860000,
+                        farm_production: 120000,
+                        farms_count: 2,
+                        farms_area: 80000,
+                        boats: 1100,
+                        fishermen: 230,
+                        wheat_area: 280000,
+                        wheat_production: 810000,
+                        cotton_area: 46000,
+                        cotton_fiber_production: 31000,
+                        cotton_seed_production: 18000,
+                        sugarcane_area: 130,
+                        sugarcane_production: 5000,
+                        rice_area: 420000,
+                        rice_production: 1650000,
+                        cropped_area: 1100000,
+                        cultivated_area: 650000,
+                        winter_crops_area: 600000,
+                        winter_crops_production: 7000000,
+                        summer_crops_area: 560000,
+                        summer_crops_production: 2000000,
+                        winter_vegetables_area: 36000,
+                        winter_vegetables_production: 340000,
+                        summer_vegetables_area: 56000,
+                        summer_vegetables_production: 180000
+                    }
+                }
+            },
+            "مريوط": {
+                position: [31.0833, 29.8333],
+                area: { 2013: 139, 2016: 139, 2019: 166, 2021: 166, 2023: 85, 2025: 85, 2030: 80, 2035: 75 },
+                salinity: { 2013: 3.5, 2016: 3.7, 2019: 3.9, 2021: 4.0, 2023: 4.2, 2025: 4.5, 2030: 4.8, 2035: 5.0 },
+                depth: { 2013: 0.8, 2016: 0.7, 2019: 0.7, 2021: 0.6, 2023: 0.6, 2025: 0.5, 2030: 0.4, 2035: 0.3 },
+                agriFishStats: {
+                    2013: {
+                        fish_production: 42000,
+                        fish_percentage_north: 25,
+                        fish_value: 600000,
+                        farm_production: 80000,
+                        farms_count: 1,
+                        farms_area: 50000,
+                        boats: 800,
+                        fishermen: 150,
+                        wheat_area: 150000,
+                        wheat_production: 420000,
+                        cotton_area: 30000,
+                        cotton_fiber_production: 20000,
+                        cotton_seed_production: 10000,
+                        sugarcane_area: 100,
+                        sugarcane_production: 4000,
+                        rice_area: 200000,
+                        rice_production: 800000,
+                        cropped_area: 700000,
+                        cultivated_area: 400000,
+                        winter_crops_area: 350000,
+                        winter_crops_production: 4000000,
+                        summer_crops_area: 300000,
+                        summer_crops_production: 1200000,
+                        winter_vegetables_area: 20000,
+                        winter_vegetables_production: 180000,
+                        summer_vegetables_area: 30000,
+                        summer_vegetables_production: 100000
+                    },
+                    2016: {
+                        fish_production: 40000,
+                        fish_percentage_north: 25,
+                        fish_value: 600000,
+                        farm_production: 80000,
+                        farms_count: 1,
+                        farms_area: 50000,
+                        boats: 800,
+                        fishermen: 150,
+                        wheat_area: 150000,
+                        wheat_production: 400000,
+                        cotton_area: 30000,
+                        cotton_fiber_production: 20000,
+                        cotton_seed_production: 10000,
+                        sugarcane_area: 100,
+                        sugarcane_production: 4000,
+                        rice_area: 200000,
+                        rice_production: 800000,
+                        cropped_area: 700000,
+                        cultivated_area: 400000,
+                        winter_crops_area: 350000,
+                        winter_crops_production: 4000000,
+                        summer_crops_area: 300000,
+                        summer_crops_production: 1200000,
+                        winter_vegetables_area: 20000,
+                        winter_vegetables_production: 180000,
+                        summer_vegetables_area: 30000,
+                        summer_vegetables_production: 100000
+                    },
+                    2019: {
+                        fish_production: 38000,
+                        fish_percentage_north: 22,
+                        fish_value: 550000,
+                        farm_production: 75000,
+                        farms_count: 1,
+                        farms_area: 45000,
+                        boats: 750,
+                        fishermen: 140,
+                        wheat_area: 140000,
+                        wheat_production: 400000,
+                        cotton_area: 28000,
+                        cotton_fiber_production: 18000,
+                        cotton_seed_production: 9000,
+                        sugarcane_area: 90,
+                        sugarcane_production: 3800,
+                        rice_area: 190000,
+                        rice_production: 750000,
+                        cropped_area: 650000,
+                        cultivated_area: 380000,
+                        winter_crops_area: 320000,
+                        winter_crops_production: 3800000,
+                        summer_crops_area: 280000,
+                        summer_crops_production: 1100000,
+                        winter_vegetables_area: 18000,
+                        winter_vegetables_production: 160000,
+                        summer_vegetables_area: 28000,
+                        summer_vegetables_production: 90000
+                    },
+                    2022: {
+                        fish_production: 36000,
+                        fish_percentage_north: 20,
+                        fish_value: 520000,
+                        farm_production: 70000,
+                        farms_count: 1,
+                        farms_area: 40000,
+                        boats: 700,
+                        fishermen: 130,
+                        wheat_area: 130000,
+                        wheat_production: 380000,
+                        cotton_area: 26000,
+                        cotton_fiber_production: 16000,
+                        cotton_seed_production: 8000,
+                        sugarcane_area: 80,
+                        sugarcane_production: 3600,
+                        rice_area: 180000,
+                        rice_production: 700000,
+                        cropped_area: 600000,
+                        cultivated_area: 350000,
+                        winter_crops_area: 300000,
+                        winter_crops_production: 3600000,
+                        summer_crops_area: 260000,
+                        summer_crops_production: 1000000,
+                        winter_vegetables_area: 16000,
+                        winter_vegetables_production: 140000,
+                        summer_vegetables_area: 26000,
+                        summer_vegetables_production: 80000
+                    }
+                }
+            },
+            "إدكو": {
+                position: [31.2833, 30.3000],
+                area: { 2013: 16.92, 2016: 16.92, 2019: 54, 2021: 54, 2023: 56.4, 2025: 56.4, 2030: 60, 2035: 65 },
+                salinity: { 2013: 4.0, 2016: 4.2, 2019: 4.5, 2021: 4.7, 2023: 4.8, 2025: 5.0, 2030: 5.2, 2035: 5.5 },
+                depth: { 2013: 0.6, 2016: 0.5, 2019: 0.5, 2021: 0.4, 2023: 0.4, 2025: 0.3, 2030: 0.3, 2035: 0.2 },
+                agriFishStats: {
+                    2013: {
+                        fish_production: 6169,
+                        fish_percentage_north: 4.26,
+                        fish_value: 61540,
+                        farm_production: 114112,
+                        farms_count: 2,
+                        farms_area: 15105,
+                        boats: 734,
+                        fishermen: 711,
+                        wheat_area: 354207,
+                        wheat_production: 1043431,
+                        cotton_area: 92429,
+                        cotton_fiber_production: 83865,
+                        cotton_seed_production: 43787,
+                        sugarcane_area: 150,
+                        sugarcane_production: 4200,
+                        rice_area: 176706,
+                        rice_production: 715483,
+                        cropped_area: 1770225,
+                        cultivated_area: 942776,
+                        winter_crops_area: 701512,
+                        winter_crops_production: 9767190,
+                        summer_crops_area: 322714,
+                        summer_crops_production: 2521727
+                    },
+                    2016: {
+                        fish_production: 5083,
+                        fish_percentage_north: 4.11,
+                        fish_value: 77752,
+                        farm_production: 137249,
+                        farms_count: 2,
+                        farms_area: 14615,
+                        boats: 763,
+                        fishermen: 1831,
+                        wheat_area: 308580,
+                        wheat_production: 914554,
+                        cotton_area: 32016,
+                        cotton_fiber_production: 38777,
+                        cotton_seed_production: 11473,
+                        sugarcane_area: 124,
+                        sugarcane_production: 3378,
+                        rice_area: 164083,
+                        rice_production: 625977,
+                        cropped_area: 1863008,
+                        cultivated_area: 922333,
+                        winter_crops_area: 1385537,
+                        winter_crops_production: 9877483,
+                        summer_crops_area: 292392,
+                        summer_crops_production: 2412051
+                    },
+                    2019: {
+                        fish_production: 8005,
+                        fish_percentage_north: 4.46,
+                        fish_value: 200960,
+                        farm_production: 192592,
+                        farms_count: 2,
+                        farms_area: 27484,
+                        boats: 674,
+                        fishermen: 2227,
+                        wheat_area: 386705,
+                        wheat_production: 1073739,
+                        cotton_area: 21937,
+                        cotton_fiber_production: 25076,
+                        cotton_seed_production: 15045,
+                        sugarcane_area: 0,
+                        sugarcane_production: 0,
+                        rice_area: 186650,
+                        rice_production: 665034,
+                        cropped_area: 1806640,
+                        cultivated_area: 932610,
+                        winter_crops_area: 1419913,
+                        winter_crops_production: 10085672,
+                        summer_crops_area: 216312,
+                        summer_crops_production: 1774200
+                    },
+                    2022: {
+                        fish_production: 8674,
+                        fish_percentage_north: 4.10,
+                        fish_value: 274773,
+                        farm_production: 193401,
+                        farms_count: 2,
+                        farms_area: 13822,
+                        boats: 47,
+                        fishermen: 811,
+                        wheat_area: 255121,
+                        wheat_production: 771767,
+                        cotton_area: 28292,
+                        cotton_fiber_production: 33687,
+                        cotton_seed_production: 20212,
+                        sugarcane_area: 108,
+                        sugarcane_production: 3031,
+                        rice_area: 318181,
+                        rice_production: 1234728,
+                        cropped_area: 1756854,
+                        cultivated_area: 936954,
+                        winter_crops_area: 1294198,
+                        winter_crops_production: 11084034,
+                        summer_crops_area: 249664,
+                        summer_crops_production: 2309303
+                    }
+                }
+            }
+        };
+
+        // تعريفات تسميات البيانات
+        const dataLabels = {
+            fish_production: 'إنتاج الأسماك (طن)',
+            fish_percentage_north: 'النسبة من بحيرات الشمال (%)',
+            fish_value: 'قيمة إنتاج الأسماك (ألف جنيه)',
+            farm_production: 'إنتاج الأسماك من المزارع (طن)',
+            farms_count: 'عدد المزارع الحكومية',
+            farms_area: 'مساحة المزارع (فدان)',
+            boats: 'عدد المراكب',
+            fishermen: 'عدد الصيادين',
+            wheat_area: 'مساحة القمح (فدان)',
+            wheat_production: 'إنتاج القمح (طن)',
+            cotton_area: 'مساحة القطن (فدان)',
+            cotton_fiber_production: 'إنتاج القطن - ألياف (طن)',
+            cotton_seed_production: 'إنتاج القطن - بذرة (طن)',
+            sugarcane_area: 'مساحة قصب السكر (فدان)',
+            sugarcane_production: 'إنتاج قصب السكر (طن)',
+            rice_area: 'مساحة الأرز (فدان)',
+            rice_production: 'إنتاج الأرز (طن)',
+            cropped_area: 'المساحة المحصولية (فدان)',
+            cultivated_area: 'المساحة المزروعة (فدان)',
+            winter_crops_area: 'مساحة المحاصيل الحقلية الشتوية (فدان)',
+            winter_crops_production: 'إنتاج المحاصيل الحقلية الشتوية (طن)',
+            summer_crops_area: 'مساحة المحاصيل الحقلية الصيفية (فدان)',
+            summer_crops_production: 'إنتاج المحاصيل الحقلية الصيفية (طن)',
+            winter_vegetables_area: 'مساحة الخضر الشتوية (فدان)',
+            winter_vegetables_production: 'إنتاج الخضر الشتوية (طن)',
+            summer_vegetables_area: 'مساحة الخضر الصيفية (فدان)',
+            summer_vegetables_production: 'إنتاج الخضر الصيفية (طن)'
+        };
+
+        // تحديث الجدول بناءً على اختيار البحيرة
+        function updateDataTable(lakeName) {
+            const lake = lakesData[lakeName];
+            const tableHeader = document.getElementById('table-header');
+            const tableBody = document.getElementById('table-body');
+
+            if (!lake.agriFishStats) {
+                tableHeader.innerHTML = '<th>البيانات غير متاحة</th>';
+                tableBody.innerHTML = '';
+                return;
+            }
+
+            const years = [2013, 2016, 2019, 2022];
+            const headers = ['البيانات', ...years.map(year => year)];
+            tableHeader.innerHTML = headers.map(header => `<th>${header}</th>`).join('');
+
+            const rows = [];
+            const metrics = Object.keys(dataLabels);
+            metrics.forEach(metric => {
+                const rowData = years.map(year => {
+                    const value = lake.agriFishStats[year] ? lake.agriFishStats[year][metric] : undefined;
+                    return value !== undefined ? value.toLocaleString() : '-';
+                });
+                rows.push([dataLabels[metric], ...rowData]);
+            });
+
+            tableBody.innerHTML = rows.map(row => `<tr><td>${row[0]}</td>${row.slice(1).map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('');
+        }
+
+        // تهيئة الخريطة
+        const map = L.map('map').setView([31.0, 30.5], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        }).addTo(map);
+
+        const lakeLayers = {};
+        Object.keys(lakesData).forEach(lakeName => {
+            const lake = lakesData[lakeName];
+            const radius = Math.sqrt(lake.area[2035]) * 100;
+            lakeLayers[lakeName] = L.circle(lake.position, {
+                radius: radius,
+                fillColor: getLakeColor(lakeName),
+                fillOpacity: 0.7,
+                color: '#000',
+                weight: 1
+            }).addTo(map).bindPopup(`<b>${lakeName}</b><br>المساحة 2035: ${lake.area[2035]} كم²`);
+        });
+
+        // تحديث الخريطة بناءً على السنة
+        function updateMap(year) {
+            Object.keys(lakesData).forEach(lakeName => {
+                const lake = lakesData[lakeName];
+                const area = lake.area[year] || predictValue(lake.area, year);
+                const radius = Math.sqrt(area) * 100;
+                lakeLayers[lakeName].setRadius(radius);
+                lakeLayers[lakeName].setPopupContent(`<b>${lakeName}</b><br>المساحة ${year}: ${area.toFixed(2)} كم²`);
+            });
+        }
+
+        // دالة التنبؤ بالقيم باستخدام الانحدار الخطي
+        function predictValue(data, year) {
+            const years = Object.keys(data).map(Number);
+            const values = Object.values(data);
+            const regression = (x1, y1, x2, y2) => {
+                const m = (y2 - y1) / (x2 - x1);
+                return y1 + m * (year - x1);
+            };
+            const lastTwo = years.slice(-2);
+            return regression(lastTwo[0], data[lastTwo[0]], lastTwo[1], data[lastTwo[1]]);
+        }
+
+        // تحديث معلومات البحيرات
+        function updateLakeInfo(year) {
+            const lakeInfo = document.getElementById('lake-info');
+            lakeInfo.innerHTML = '';
+            Object.keys(lakesData).forEach(lakeName => {
+                const lake = lakesData[lakeName];
+                const area = lake.area[year] || predictValue(lake.area, year);
+                const salinity = lake.salinity[year] || predictValue(lake.salinity, year);
+                const depth = lake.depth[year] || predictValue(lake.depth, year);
+                let statsHtml = '';
+                if (lake.agriFishStats && lake.agriFishStats[year]) {
+                    const stats = lake.agriFishStats[year];
+                    statsHtml = `
+                        <p>إنتاج الأسماك: ${stats.fish_production.toLocaleString()} طن</p>
+                        <p>إنتاج القمح: ${stats.wheat_production.toLocaleString()} طن</p>
+                        <p>إنتاج الأرز: ${stats.rice_production.toLocaleString()} طن</p>
+                    `;
+                }
+
+                lakeInfo.innerHTML += `
+                    <div class="info-card">
+                        <h3>${lakeName}</h3>
+                        <p>المساحة: ${area.toFixed(2)} كم²</p>
+                        <p>الملوحة: ${salinity.toFixed(1)} جم/لتر</p>
+                        <p>العمق: ${depth.toFixed(1)} م</p>
+                        ${statsHtml}
+                    </div>
+                `;
+            });
+        }
+
+        // تحديث المقارنة
+        function updateComparison(year) {
+            const comparisonGrid = document.getElementById('comparison-grid');
+            comparisonGrid.innerHTML = '';
+            Object.keys(lakesData).forEach(lakeName => {
+                const lake = lakesData[lakeName];
+                const area = lake.area[year] || predictValue(lake.area, year);
+                const salinity = lake.salinity[year] || predictValue(lake.salinity, year);
+                const depth = lake.depth[year] || predictValue(lake.depth, year);
+                let statsHtml = '';
+                if (lake.agriFishStats && lake.agriFishStats[year]) {
+                    const stats = lake.agriFishStats[year];
+                    statsHtml = `
+                        <p>إنتاج الأسماك: ${stats.fish_production.toLocaleString()} طن</p>
+                        <p>إنتاج القمح: ${stats.wheat_production.toLocaleString()} طن</p>
+                        <p>إنتاج الأرز: ${stats.rice_production.toLocaleString()} طن</p>
+                    `;
+                }
+
+                comparisonGrid.innerHTML += `
+                    <div class="comparison-card">
+                        <h3>${lakeName}</h3>
+                        <p>المساحة: ${area.toFixed(2)} كم²</p>
+                        <p>الملوحة: ${salinity.toFixed(1)} جم/لتر</p>
+                        <p>العمق: ${depth.toFixed(1)} م</p>
+                        ${statsHtml}
+                    </div>
+                `;
+            });
+        }
+
+        // مخطط المساحة
+        function updateAreaChart(year) {
+            const years = Object.keys(lakesData[Object.keys(lakesData)[0]].area).map(Number);
+            const data = Object.keys(lakesData).map(lakeName => ({
+                x: years,
+                y: years.map(y => lakesData[lakeName].area[y] || predictValue(lakesData[lakeName].area, y)),
+                name: lakeName,
+                type: 'scatter'
+            }));
+            Plotly.newPlot('area-chart', data, { title: 'تغيرات المساحة (كم²)' });
+        }
+
+        // مخطط الإنتاج الزراعي والأسماك
+        function updateAgricultureChart(year, dataType) {
+            const availableYears = new Set();
+            Object.keys(lakesData).forEach(lakeName => {
+                if (lakesData[lakeName].agriFishStats) {
+                    Object.keys(lakesData[lakeName].agriFishStats).forEach(y => availableYears.add(parseInt(y)));
+                }
+            });
+            const years = Array.from(availableYears).sort((a, b) => a - b);
+
+            const data = Object.keys(lakesData).map(lakeName => {
+                const lake = lakesData[lakeName];
+                if (!lake.agriFishStats) return null;
+
+                const values = years.map(y => {
+                    if (lake.agriFishStats[y] && lake.agriFishStats[y][dataType] !== undefined) {
+                        return lake.agriFishStats[y][dataType];
+                    }
+                    return null;
+                });
+
+                return {
+                    x: years,
+                    y: values,
+                    name: lakeName,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    connectgaps: false
+                };
+            }).filter(d => d !== null);
+
+            const title = dataLabels[dataType];
+            Plotly.newPlot('agriculture-chart', data, { title: `تغيرات ${title}` });
+        }
+
+        // عرض ثلاثي الأبعاد
+        document.getElementById('3d-view-btn').addEventListener('click', () => {
+            const years = Object.keys(lakesData[Object.keys(lakesData)[0]].area).map(Number);
+            const data = Object.keys(lakesData).map(lakeName => ({
+                x: years,
+                y: Array(years.length).fill(lakeName),
+                z: years.map(y => lakesData[lakeName].area[y] || predictValue(lakesData[lakeName].area, y)),
+                type: 'surface'
+            }));
+            Plotly.newPlot('area-chart', data, { title: 'تغيرات المساحة ثلاثية الأبعاد' });
+        });
+
+        // التحكم في شريط الزمن
+        const yearSlider = document.getElementById('year-slider');
+        const yearDisplay = document.getElementById('year-display');
+        yearSlider.addEventListener('input', () => {
+            const year = parseInt(yearSlider.value);
+            yearDisplay.textContent = year;
+            updateMap(year);
+            updateLakeInfo(year);
+            updateComparison(year);
+            updateAreaChart(year);
+            updateAgricultureChart(year, document.getElementById('data-selector').value);
+        });
+
+        // اختيار نوع البيانات
+        const dataSelector = document.getElementById('data-selector');
+        dataSelector.addEventListener('change', () => {
+            const year = parseInt(yearSlider.value);
+            updateAgricultureChart(year, dataSelector.value);
+        });
+
+        // اختيار البحيرة للجدول
+        const lakeSelector = document.getElementById('lake-selector');
+        lakeSelector.addEventListener('change', () => {
+            updateDataTable(lakeSelector.value);
+        });
+
+        // زر العرض المتحرك
+        const animateBtn = document.getElementById('animate-btn');
+        let animationInterval;
+        animateBtn.addEventListener('click', () => {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+                animateBtn.innerHTML = '<i class="fas fa-play"></i> عرض متحرك';
+            } else {
+                const years = Object.keys(lakesData[Object.keys(lakesData)[0]].area).map(Number);
+                let index = 0;
+                animationInterval = setInterval(() => {
+                    if (index >= years.length) {
+                        clearInterval(animationInterval);
+                        animationInterval = null;
+                        animateBtn.innerHTML = '<i class="fas fa-play"></i> عرض متحرك';
+                        return;
+                    }
+                    const year = years[index];
+                    yearSlider.value = year;
+                    yearDisplay.textContent = year;
+                    updateMap(year);
+                    updateLakeInfo(year);
+                    updateComparison(year);
+                    updateAreaChart(year);
+                    updateAgricultureChart(year, dataSelector.value);
+                    index++;
+                }, 1000);
+                animateBtn.innerHTML = '<i class="fas fa-pause"></i> إيقاف';
+            }
+        });
+
+        // زر التنبؤ العام
+        document.getElementById('predict-btn').addEventListener('click', () => {
+            const result = document.getElementById('prediction-result');
+            const text = document.getElementById('prediction-text');
+            result.style.display = 'block';
+            text.innerHTML = 'التوقعات تشير إلى استمرار انخفاض مساحة البحيرات مع زيادة الملوحة بحلول 2035، مما سيؤثر على الإنتاج الزراعي والسمكي.';
+        });
+
+        // زر التنبؤ الزراعي مع توصيات
+        document.getElementById('agri-predict-btn').addEventListener('click', () => {
+            const result = document.getElementById('agri-prediction-result');
+            const text = document.getElementById('agri-prediction-text');
+            const recommendations = document.getElementById('recommendations');
+            const dataType = dataSelector.value;
+            result.style.display = 'block';
+            const dataLabel = dataLabels[dataType];
+            text.innerHTML = `من المتوقع انخفاض ${dataLabel} بحلول 2035 نتيجة تقلص المساحة وزيادة الملوحة.`;
+            recommendations.innerHTML = `
+                <h4>توصيات الذكاء الاصطناعي:</h4>
+                <ul>
+                    <li>استخدام تقنيات الري الحديثة لتقليل تأثير الملوحة.</li>
+                    <li>زراعة محاصيل مقاومة للملوحة مثل الشعير.</li>
+                    <li>إنشاء مناطق عازلة حول البحيرات لتقليل التعديات.</li>
+                    ${dataType.includes('fish') ? '<li>تحسين إدارة المصايد لضمان استدامة إنتاج الأسماك.</li>' : ''}
+                </ul>
+            `;
+        });
+
+        // محاكاة السيناريوهات
+        document.getElementById('simulate-btn').addEventListener('click', () => {
+            const scenario = document.getElementById('scenario-selector').value;
+            const years = Object.keys(lakesData[Object.keys(lakesData)[0]].area).map(Number);
+            const data = Object.keys(lakesData).map(lakeName => {
+                const baseData = lakesData[lakeName].area;
+                const factor = scenario === 'optimistic' ? 0.95 : scenario === 'pessimistic' ? 1.1 : 1.0;
+                return {
+                    x: years,
+                    y: years.map(y => (baseData[y] || predictValue(baseData, y)) * factor),
+                    name: lakeName,
+                    type: 'scatter'
+                };
+            });
+            Plotly.newPlot('scenario-chart', data, { title: `محاكاة السيناريو: ${scenario === 'optimistic' ? 'متفائل' : scenario === 'pessimistic' ? 'متشائم' : 'معتدل'}` });
+        });
+
+        // دالة لتحديد لون كل بحيرة
+        function getLakeColor(lakeName) {
+            const colors = {
+                "المنزلة": "#2980b9",
+                "البرلس": "#27ae60",
+                "مريوط": "#e74c3c",
+                "إدكو": "#f39c12"
+            };
+            return colors[lakeName] || "#3498db";
+        }
+
+        // التهيئة الأولية
+        updateMap(2035);
+        updateLakeInfo(2035);
+        updateComparison(2035);
+        updateAreaChart(2035);
+        updateAgricultureChart(2035, 'fish_production');
+        updateDataTable('المنزلة');
+    </script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>اتصل بنا - رؤى دلتا الشمال</title>
+   <!-- Font Awesome CSS -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+   <!-- Custom CSS -->
+   <link rel="stylesheet" href="contactus.css">
+   <link rel="stylesheet" href="style2.css">
+   <style>
+      /* تنسيق إضافي لدعم الوضع الداكن والقائمة */
+      body.dark-mode {
+         background-color: #1a1a1a;
+         color: #f0f0f0;
+      }
+      body.dark-mode .header {
+         background: linear-gradient(90deg, #1e3a8a, #166534);
+      }
+      body.dark-mode .footer {
+         background: linear-gradient(90deg, #1e3a8a, #166534);
+         color: #d1d5db;
+      }
+      body.dark-mode .main-content {
+         background-color: #2d2d2d;
+      }
+      body.dark-mode .form-container input,
+      body.dark-mode .form-container textarea {
+         background-color: #3a3a3a;
+         color: #fff;
+         border: 1px solid #555;
+      }
+      body.dark-mode .info-container .info-box {
+         background-color: #3a3a3a;
+         color: #fff;
+      }
+      .nav-links {
+         display: none; /* إخفاء القائمة افتراضيًا في الشاشات الصغيرة */
+         flex-direction: column;
+         position: absolute;
+         top: 60px;
+         right: 20px;
+         background: #fff;
+         padding: 1rem;
+         border-radius: 5px;
+         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .nav-links.active {
+         display: flex; /* إظهار القائمة عند التفعيل */
+      }
+      body.dark-mode .nav-links {
+         background: #2d2d2d;
+         color: #fff;
+      }
+      
+      /* لوحة المشرف */
+      .admin-panel {
+         display: none;
+         position: fixed;
+         top: 0;
+         right: 0;
+         width: 400px;
+         height: 100vh;
+         background: #fff;
+         box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+         padding: 1rem;
+         overflow-y: auto;
+         z-index: 1000;
+      }
+      
+      body.dark-mode .admin-panel {
+         background: #2d2d2d;
+         color: #fff;
+      }
+      
+      .admin-panel h3 {
+         color: #0066cc;
+         margin-bottom: 1rem;
+         border-bottom: 1px solid #eee;
+         padding-bottom: 0.5rem;
+      }
+      
+      body.dark-mode .admin-panel h3 {
+         border-color: #444;
+      }
+      
+      .message-list {
+         margin-top: 1rem;
+      }
+      
+      .message-item {
+         padding: 1rem;
+         margin-bottom: 1rem;
+         border: 1px solid #eee;
+         border-radius: 5px;
+         background: #f9f9f9;
+      }
+      
+      body.dark-mode .message-item {
+         background: #3a3a3a;
+         border-color: #444;
+      }
+      
+      .message-item h4 {
+         margin-bottom: 0.5rem;
+         color: #0066cc;
+      }
+      
+      .message-item p {
+         margin: 0.3rem 0;
+      }
+      
+      .admin-toggle {
+         position: fixed;
+         top: 20px;
+         right: 20px;
+         background: #0066cc;
+         color: white;
+         width: 40px;
+         height: 40px;
+         border-radius: 50%;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         cursor: pointer;
+         z-index: 1001;
+      }
+      
+      .admin-toggle:hover {
+         background: #00aaff;
+      }
+      
+      .export-btn {
+         display: block;
+         width: 100%;
+         padding: 0.8rem;
+         background: #0066cc;
+         color: white;
+         border: none;
+         border-radius: 5px;
+         margin-top: 1rem;
+         cursor: pointer;
+      }
+      
+      .export-btn:hover {
+         background: #00aaff;
+      }
+
+      @media (min-width: 768px) {
+         .nav-links {
+            display: flex; /* إظهار القائمة بشكل أفقي في الشاشات الكبيرة */
+            position: static;
+            flex-direction: row;
+            background: none;
+            box-shadow: none;
+            padding: 0;
+         }
+      }
+      
+      @media (max-width: 768px) {
+         .admin-panel {
+            width: 100%;
+         }
+      }
+   </style>
+</head>
+<body>
+   <!-- Header -->
+   <header class="header">
+      <div class="logo">رؤى دلتا الشمال</div>
+      <div class="nav-links">
+         <a href="index4.html">الرئيسية</a>
+         <a href="#maps">الخرائط</a>
+         <a href="#about">عن الموقع</a>
+         <a href="#contact">اتصل بنا</a>
+      </div>
+      <div class="search-bar">
+         <input type="text" placeholder="ابحث عن خدمات...">
+         <button><i class="fas fa-search"></i></button>
+      </div>
+      <div class="actions">
+         <a href="login.html" class="btn">تسجيل الدخول</a>
+         <a href="register.html" class="btn">التسجيل</a>
+         <div class="icon" id="dark-mode-toggle">
+            <i class="fas fa-moon"></i>
+         </div>
+         <div class="icon" id="menu-btn">
+            <i class="fas fa-bars"></i>
+         </div>
+         <select id="language-switcher">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+         </select>
+      </div>
+   </header>
+
+   <!-- Main Content -->
+   <main class="main-content" id="main-content">
+      <section class="contact">
+         <h1 class="heading">اتصل بنا</h1>
+         <div class="row">
+            <!-- Contact Form -->
+            <div class="form-container">
+               <h3>تواصل معنا</h3>
+               <form id="contact-form">
+                  <input type="text" name="name" placeholder="اسمك" required maxlength="50" class="box">
+                  <input type="email" name="email" placeholder="بريدك الإلكتروني" required maxlength="50" class="box">
+                  <input type="tel" name="number" placeholder="رقم هاتفك" required maxlength="15" class="box">
+                  <textarea name="message" placeholder="رسالتك" required maxlength="1000" class="box"></textarea>
+                  <button type="submit" class="inline-btn">إرسال الرسالة</button>
+                  <div id="form-message" style="margin-top: 1rem;"></div>
+               </form>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="info-container">
+               <div class="info-box">
+                  <i class="fas fa-phone"></i>
+                  <h3>الهاتف</h3>
+                  <a href="tel:1234567890">01234567890</a>
+                  <a href="tel:1112223333">01112223333</a>
+               </div>
+               <div class="info-box">
+                  <i class="fas fa-envelope"></i>
+                  <h3>البريد الإلكتروني</h3>
+                  <a href="mailto:info@northdelta.com">info@northdelta.com</a>
+                  <a href="mailto:support@northdelta.com">support@northdelta.com</a>
+               </div>
+               <div class="info-box">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <h3>العنوان</h3>
+                  <a href="#" id="map-toggle">محافظة المنيا، مصر</a>
+               </div>
+            </div>
+         </div>
+
+         <!-- Interactive Map -->
+         <div class="map-container" id="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3523961.489589842!2d29.2675469!3d30.3292364!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f7e2e5e8c!2sMinya%2C%20Egypt!5e0!3m2!1sen!2seg!4v16987654321" allowfullscreen="" loading="lazy"></iframe>
+         </div>
+      </section>
+   </main>
+
+   <!-- لوحة تحكم المشرف -->
+   <div class="admin-toggle" id="adminToggle" style="display: none;">
+      <i class="fas fa-user-shield"></i>
+   </div>
+
+   <div class="admin-panel" id="adminPanel">
+      <h3>لوحة تحكم المشرف</h3>
+      <p>مرحباً، يمكنك هنا إدارة رسائل الزوار</p>
+      
+      <div class="message-list" id="messageList">
+         <h4>الرسائل الواردة</h4>
+         <!-- سيتم ملء الرسائل هنا بواسطة الجافاسكريبت -->
+      </div>
+      
+      <button class="export-btn" id="exportMessages">تصدير جميع الرسائل</button>
+   </div>
+
+   <!-- Footer -->
+   <footer class="footer">
+      © حقوق الطبع والنشر 2024 بواسطة <span>عمار محمد عبدالله</span> | جميع الحقوق محفوظة!
+   </footer>
+
+   <!-- Custom JavaScript -->
+   <script>
+      // تهيئة التطبيق
+      document.addEventListener('DOMContentLoaded', function() {
+         // تحقق مما إذا كان هناك رسائل مخزنة في localStorage
+         if (!localStorage.getItem('contactMessages')) {
+            localStorage.setItem('contactMessages', JSON.stringify([]));
+         }
+         
+         // تحقق مما إذا كان هناك مستخدم مسجل
+         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+         if (currentUser && currentUser.isAdmin) {
+            document.getElementById('adminToggle').style.display = 'flex';
+            updateMessageList();
+         }
+         
+         // تهيئة عناصر DOM
+         const contactForm = document.getElementById('contact-form');
+         const formMessage = document.getElementById('form-message');
+         const adminToggle = document.getElementById('adminToggle');
+         const adminPanel = document.getElementById('adminPanel');
+         const messageList = document.getElementById('messageList');
+         const exportMessagesBtn = document.getElementById('exportMessages');
+         const languageSwitcher = document.getElementById('language-switcher');
+         const darkModeToggle = document.getElementById('dark-mode-toggle');
+         const menuBtn = document.getElementById('menu-btn');
+         const navLinks = document.querySelector('.nav-links');
+         
+         // إرسال نموذج الاتصال
+         contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(contactForm);
+            const message = {
+               id: Date.now(),
+               name: formData.get('name'),
+               email: formData.get('email'),
+               number: formData.get('number'),
+               message: formData.get('message'),
+               date: new Date().toLocaleString(),
+               read: false
+            };
+            
+            // حفظ الرسالة في localStorage
+            const messages = JSON.parse(localStorage.getItem('contactMessages'));
+            messages.push(message);
+            localStorage.setItem('contactMessages', JSON.stringify(messages));
+            
+            // عرض رسالة نجاح
+            formMessage.textContent = 'تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.';
+            formMessage.style.color = 'green';
+            
+            // تحديث قائمة الرسائل في لوحة التحكم
+            updateMessageList();
+            
+            // إعادة تعيين النموذج
+            contactForm.reset();
+            
+            // إخفاء رسالة النجاح بعد 5 ثواني
+            setTimeout(() => {
+               formMessage.textContent = '';
+            }, 5000);
+         });
+         
+         // عرض/إخفاء لوحة التحكم
+         adminToggle.addEventListener('click', function() {
+            adminPanel.style.display = adminPanel.style.display === 'block' ? 'none' : 'block';
+         });
+         
+         // تصدير الرسائل
+         exportMessagesBtn.addEventListener('click', function() {
+            const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+            const dataStr = JSON.stringify(messages, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'contact-messages.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+         });
+         
+         // تحديث قائمة الرسائل
+         function updateMessageList() {
+            const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+            
+            messageList.innerHTML = '<h4>الرسائل الواردة (' + messages.length + ')</h4>';
+            
+            if (messages.length === 0) {
+               messageList.innerHTML += '<p>لا توجد رسائل حتى الآن.</p>';
+               return;
+            }
+            
+            // عرض الرسائل من الأحدث إلى الأقدم
+            messages.slice().reverse().forEach(msg => {
+               const messageItem = document.createElement('div');
+               messageItem.className = 'message-item';
+               messageItem.innerHTML = `
+                  <h4>${msg.name}</h4>
+                  <p><strong>البريد الإلكتروني:</strong> ${msg.email}</p>
+                  <p><strong>الهاتف:</strong> ${msg.number}</p>
+                  <p><strong>التاريخ:</strong> ${msg.date}</p>
+                  <p><strong>الرسالة:</strong> ${msg.message}</p>
+                  <hr>
+               `;
+               messageList.appendChild(messageItem);
+            });
+         }
+      });
+
+      // Language Switcher
+      const translations = {
+         ar: {
+            title: "اتصل بنا - رؤى دلتا الشمال",
+            logo: "رؤى دلتا الشمال",
+            home: "الرئيسية",
+            maps: "الخرائط",
+            about: "عن الموقع",
+            contact: "اتصل بنا",
+            search: "ابحث عن خدمات...",
+            login: "تسجيل الدخول",
+            register: "التسجيل",
+            contactUs: "اتصل بنا",
+            getInTouch: "تواصل معنا",
+            name: "اسمك",
+            email: "بريدك الإلكتروني",
+            number: "رقم هاتفك",
+            message: "رسالتك",
+            send: "إرسال الرسالة",
+            phone: "الهاتف",
+            emailLabel: "البريد الإلكتروني",
+            address: "العنوان",
+            location: "محافظة المنيا، مصر",
+            footer: "© حقوق الطبع والنشر 2024 بواسطة <span>عمار محمد عبدالله</span> | جميع الحقوق محفوظة!"
+         },
+         en: {
+            title: "Contact Us - North Delta Insights",
+            logo: "North Delta Insights",
+            home: "Home",
+            maps: "Maps",
+            about: "About",
+            contact: "Contact",
+            search: "Search services...",
+            login: "Login",
+            register: "Register",
+            contactUs: "Contact Us",
+            getInTouch: "Get in Touch",
+            name: "Your Name",
+            email: "Your Email",
+            number: "Your Number",
+            message: "Your Message",
+            send: "Send Message",
+            phone: "Phone",
+            emailLabel: "Email",
+            address: "Address",
+            location: "Minya Governorate, Egypt",
+            footer: "© Copyright @ 2024 by <span>Ammar Mohamed Abdallah</span> | All Rights Reserved!"
+         }
+      };
+
+      const languageSwitcher = document.getElementById('language-switcher');
+      languageSwitcher.addEventListener('change', function() {
+         const lang = this.value;
+         document.title = translations[lang].title;
+         document.querySelector('.logo').textContent = translations[lang].logo;
+         document.querySelectorAll('.nav-links a')[0].textContent = translations[lang].home;
+         document.querySelectorAll('.nav-links a')[1].textContent = translations[lang].maps;
+         document.querySelectorAll('.nav-links a')[2].textContent = translations[lang].about;
+         document.querySelectorAll('.nav-links a')[3].textContent = translations[lang].contact;
+         document.querySelector('.search-bar input').placeholder = translations[lang].search;
+         document.querySelectorAll('.actions .btn')[0].textContent = translations[lang].login;
+         document.querySelectorAll('.actions .btn')[1].textContent = translations[lang].register;
+         document.querySelector('.heading').textContent = translations[lang].contactUs;
+         document.querySelector('.form-container h3').textContent = translations[lang].getInTouch;
+         document.querySelector('input[name="name"]').placeholder = translations[lang].name;
+         document.querySelector('input[name="email"]').placeholder = translations[lang].email;
+         document.querySelector('input[name="number"]').placeholder = translations[lang].number;
+         document.querySelector('textarea[name="message"]').placeholder = translations[lang].message;
+         document.querySelector('.inline-btn').textContent = translations[lang].send;
+         document.querySelectorAll('.info-box h3')[0].textContent = translations[lang].phone;
+         document.querySelectorAll('.info-box h3')[1].textContent = translations[lang].emailLabel;
+         document.querySelectorAll('.info-box h3')[2].textContent = translations[lang].address;
+         document.querySelector('#map-toggle').textContent = translations[lang].location;
+         document.querySelector('.footer').innerHTML = translations[lang].footer;
+
+         document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+         document.documentElement.lang = lang;
+      });
+
+      // Dark Mode Toggle
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      darkModeToggle.addEventListener('click', () => {
+         document.body.classList.toggle('dark-mode');
+         const isDark = document.body.classList.contains('dark-mode');
+         darkModeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      });
+
+      // Menu Toggle
+      const menuBtn = document.getElementById('menu-btn');
+      const navLinks = document.querySelector('.nav-links');
+      menuBtn.addEventListener('click', () => {
+         navLinks.classList.toggle('active');
+      });
+
+      // Hide menu when clicking outside
+      document.addEventListener('click', (e) => {
+         if (!menuBtn.contains(e.target) && !navLinks.contains(e.target)) {
+            navLinks.classList.remove('active');
+         }
+      });
+   </script>
+   <script src="contactus.js"></script>
+   <script src="script2.js"></script>
+</body>
+</html>
